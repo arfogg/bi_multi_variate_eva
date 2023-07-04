@@ -9,3 +9,11 @@ Code to run bivariate and multivariate extreme value analysis on generic data - 
 ## Required Packages
 
 scipy, numpy, matplotlib
+
+## Running the code
+
+to be completed
+
+## Acknowledgements
+
+ARF gratefully acknowledges the support of Irish Research Council Government of Ireland Postdoctoral Fellowship GOIPD/2022/782.
