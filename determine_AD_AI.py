@@ -110,31 +110,31 @@ def plot_extremal_dependence_coefficient(x_data,y_data, x_name, y_name, x_units,
     ax_edc=fig.add_subplot(gs[1,:])
     
     # Plot the original input data
-    #ax_data.plot(x_data,y_data,linewidth=0.0,marker="o", fillstyle='none', color='grey')
-    h_data=ax_data.hist2d(x_data, y_data, bins=25, density=True)
-    cb_data=fig.colorbar(h_data[3],ax=ax_data)
+    ax_data.plot(x_data,y_data,linewidth=0.0,marker="o", fillstyle='none', color='grey')
+    #h_data=ax_data.hist2d(x_data, y_data, bins=25, density=True)
+    #cb_data=fig.colorbar(h_data[3],ax=ax_data)
     # Formatting
     ax_data.set_xlabel(x_name+' '+x_units, fontsize=csize)
     ax_data.set_ylabel(y_name+' '+y_units, fontsize=csize)
     for label in (ax_data.get_xticklabels() + ax_data.get_yticklabels()):
         label.set_fontsize(csize)
-    cb_data.ax.tick_params(labelsize=csize)
-    cb_data.set_label("Normalised occurrence", fontsize=csize)
+    #cb_data.ax.tick_params(labelsize=csize)
+    #cb_data.set_label("Normalised occurrence", fontsize=csize)
     # Transform the variables into "uniform" - ask Daire
     x_unif=scipy.stats.rankdata(x_data)/(x_data.size+1)
     y_unif=scipy.stats.rankdata(y_data)/(y_data.size+1)
     
     # Plot out these uniform data
-    #ax_data_unif.plot(x_unif, y_unif, linewidth=0.0, marker='x', color='orange')
-    h_unif=ax_data_unif.hist2d(x_unif, y_unif, bins=25, density=True)
-    cb_unif=fig.colorbar(h_unif[3],ax=ax_data_unif)
+    ax_data_unif.plot(x_unif, y_unif, linewidth=0.0, marker='x', color='orange')
+    #h_unif=ax_data_unif.hist2d(x_unif, y_unif, bins=25, density=True)
+    #cb_unif=fig.colorbar(h_unif[3],ax=ax_data_unif)
     # Formatting
     ax_data_unif.set_xlabel(x_name+" normalised ????", fontsize=csize)
     ax_data_unif.set_ylabel(y_name+" normalised ????", fontsize=csize)
     for label in (ax_data_unif.get_xticklabels() + ax_data_unif.get_yticklabels()):
         label.set_fontsize(csize)
-    cb_unif.ax.tick_params(labelsize=csize)
-    cb_unif.set_label("Normalised occurrence", fontsize=csize)
+    #cb_unif.ax.tick_params(labelsize=csize)
+    #cb_unif.set_label("Normalised occurrence", fontsize=csize)
     
     # Calculate the "extremal dependence coefficient", called chi
     #    for a range of quantiles u (from 0 to 1)
@@ -153,6 +153,8 @@ def plot_extremal_dependence_coefficient(x_data,y_data, x_name, y_name, x_units,
     ax_edc.set_ylabel("Extremal Dependence Coefficient, $\chi$", fontsize=csize)
     for label in (ax_edc.get_xticklabels() + ax_edc.get_yticklabels()):
         label.set_fontsize(csize)
+    
+    
     
 def test_plot_edc():
     
