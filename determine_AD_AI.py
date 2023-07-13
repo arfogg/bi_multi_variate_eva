@@ -79,7 +79,7 @@ def test_check_AD_AI():
     u=np.linspace(0,0.99,100)  # bins of width 0.01
     chi=[]
     for i in range(u.size):
-        top,=np.where((x_unif>0.01) & (y_unif>0.01))
+        top,=np.where((x_unif>u[i]) & (y_unif>u[i]))
         bottom,=np.where(x_unif>u[i])
         chi.append( (top.size)/(bottom.size) )
         
