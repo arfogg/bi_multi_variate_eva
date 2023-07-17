@@ -123,14 +123,24 @@ def plot_extremal_dependence_coefficient(x_data,y_data, x_name, y_name, x_units,
     # Transform the variables into "uniform" - ask Daire
     x_unif=scipy.stats.rankdata(x_data)/(x_data.size+1)
     y_unif=scipy.stats.rankdata(y_data)/(y_data.size+1)
+    # PLOT X_UNIF AS FUNCTION OF X_DATA TO GET VISUALISATION OF EMPIRICAL CDF
+    
     
     # Plot out these uniform data
+    
+    # Notes from meeting
+    #    put it onto uniform margins
+    #   put everything onto same marginal distributions - e.g. if one variable
+    #   is gaussian and one not - comparing them will get biased information and results are over/underestimating dependence
+    #   so put the data into it's CDF and then you get out a uniform distribution
+    #   ^ so do this seperately to y and x -> so you get "data transformed through prob integral transform onto uniform margins"
+    
     ax_data_unif.plot(x_unif, y_unif, linewidth=0.0, marker='x', color='orange')
     #h_unif=ax_data_unif.hist2d(x_unif, y_unif, bins=25, density=True)
     #cb_unif=fig.colorbar(h_unif[3],ax=ax_data_unif)
     # Formatting
-    ax_data_unif.set_xlabel(x_name+" normalised ????", fontsize=csize)
-    ax_data_unif.set_ylabel(y_name+" normalised ????", fontsize=csize)
+    ax_data_unif.set_xlabel(x_name+" on uniform margins", fontsize=csize)
+    ax_data_unif.set_ylabel(y_name+" on uniform margins", fontsize=csize)
     for label in (ax_data_unif.get_xticklabels() + ax_data_unif.get_yticklabels()):
         label.set_fontsize(csize)
     #cb_unif.ax.tick_params(labelsize=csize)
@@ -149,7 +159,7 @@ def plot_extremal_dependence_coefficient(x_data,y_data, x_name, y_name, x_units,
 
     ax_edc.plot(u,chi, color='orange')
     # Formatting
-    ax_edc.set_xlabel("Quantiles ????", fontsize=csize)
+    ax_edc.set_xlabel("Quantiles", fontsize=csize)
     ax_edc.set_ylabel("Extremal Dependence Coefficient, $\chi$", fontsize=csize)
     for label in (ax_edc.get_xticklabels() + ax_edc.get_yticklabels()):
         label.set_fontsize(csize)
