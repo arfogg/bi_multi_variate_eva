@@ -46,9 +46,9 @@ def fit_gevd_or_gumbel(extremes_df,df_data_tag,df_time_tag='datetime',
     
     # First, check the parsed columns exist in data
     if set([df_data_tag,df_time_tag]).issubset(extremes_df.columns):
-        print('Extracting extremes for ',df_data_tag)
+        print('Fitting GEVD or Gumbel distribution')
     else:
-        print('ERROR: detect_extremes.find_block_maxima')
+        print('ERROR: fit_model_to_extremes.fit_gevd_or_gumbel')
         print('Either '+df_data_tag+' or '+df_time_tag+' does not exist in dataframe')
         print('Exiting...')
         raise NameError(df_data_tag+' or '+df_time_tag+' does not exist in dataframe')

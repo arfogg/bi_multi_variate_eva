@@ -45,3 +45,7 @@ def transform_from_data_scale_to_uniform_margins(data, plot=False):
         plt.show()
 
     return data_unif
+
+def transform_from_uniform_margins_to_data_scale(data,plot=False):
+    
+    print('hello')
