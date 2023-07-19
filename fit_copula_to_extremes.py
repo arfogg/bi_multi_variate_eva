@@ -7,6 +7,7 @@ Created on Wed Jul 19 13:40:02 2023
 
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 from copulas.multivariate import GaussianMultivariate
 
@@ -27,7 +28,8 @@ def fit_copula_bivariate(x_extremes, y_extremes, x_name, y_name):
 
     Returns
     -------
-    None.
+    copula : copulas copula
+        fitted copula
 
     """
     
@@ -50,3 +52,20 @@ def fit_copula_bivariate(x_extremes, y_extremes, x_name, y_name):
     
     return copula
 
+def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes, x_sample,
+                                    y_sample, x_name, y_name):
+    
+    
+    fig,ax=plt.subplots()
+    
+    # Plot detected extremes
+    ax.plot(x_extremes, y_extremes,linewidth=0.0,marker='^', fillstyle='none', color='black', label='data')
+    ax.set_xlabel(x_name)
+    ax.set_ylabel(y_name)
+    
+    
+    ax.plot(x_sample,y_sample, linewidth=0.0, marker='o', fillstyle='none', color='purple', label='copula sample')
+    
+    ax.legend()
+    
+    plt.show()
