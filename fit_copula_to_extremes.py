@@ -50,8 +50,3 @@ def fit_copula_bivariate(x_extremes, y_extremes, x_name, y_name):
     
     return copula
 
-def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes, x_name, y_name, copula):
-    
-    
-    print('hello')
-    # add functionality here
