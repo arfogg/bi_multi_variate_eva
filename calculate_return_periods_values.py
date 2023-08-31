@@ -49,8 +49,8 @@ def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_n
                                        block_size=pd.to_timedelta("365.2425D")):
     
     # Create a sample
-    sample=pd.DataFrame({x_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins(np.linspace(min_x,max_x,n_samples)),
-                         y_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins(np.linspace(min_y,max_y,n_samples))})
+    sample=pd.DataFrame({x_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_x,max_x,n_samples)),
+                         y_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_y,max_y,n_samples))})
     
     # Create sample grid
     xv, yv = np.meshgrid(sample[x_name], sample[y_name])
