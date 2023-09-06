@@ -83,11 +83,17 @@ def transform_from_data_scale_to_uniform_margins_using_CDF(data, fit_params, dis
             # 1- G(x) = u
             # u = data on uniform margins
             
-            data_unif[i]=1.0 - np.exp(-1.0 * (1.0 + fit_params.shape_ * ( (data[i]-fit_params.location)/(fit_params.scale) ))**(-1.0/fit_params.shape_)  )
+            # Something happens with the math when we do it all in one line.
+            # so calculating "number" to the exponent
+            number=(1.0 + (fit_params.shape_.to_numpy() * ( (data[i]-fit_params.location.to_numpy())/(fit_params.scale.to_numpy()) )))
+            data_unif[i]=1.0 - np.exp(-1.0 *np.sign(number)*(np.abs(number))**(-1.0/fit_params.shape_)  )
+            #data_unif[i]=1.0 - np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (data[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
             print(' ')
             print(data_unif[i], data[i] )
             print((-1.0/fit_params.shape_.values[0]))
-            print(1**(-1.0/fit_params.shape_.values[0]))
+            print(number)
+            print(number**(-1.0/fit_params.shape_.values[0]))
+            print(np.sign(number)*(np.abs(number))**(-1.0/fit_params.shape_))
             
             #print(fit_params.shape_)
     # Other distributions to be implemented

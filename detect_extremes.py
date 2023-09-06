@@ -6,12 +6,13 @@ Created on Tue Jul 18 16:54:38 2023
 """
 
 import pandas as pd
+import numpy as np
 
 import pyextremes
 
 
 def find_block_maxima(data,df_data_tag,df_time_tag='datetime',block_size=pd.to_timedelta("365.2425D"),
-                      extremes_type='high'):
+                      extremes_type='high', leap_year_check=False):
     """
 
     Parameters
@@ -30,6 +31,11 @@ def find_block_maxima(data,df_data_tag,df_time_tag='datetime',block_size=pd.to_t
     extremes_type : string, optional
         If extremes_type='high' block maxima are found. If extremes_type='low',
         block minima are found. The default is 'high'.
+    leap_year_check : BOOL, optional
+        If leap_year_check==True the code will check for multiple extremes in a
+        in each year parsed. Note over *many* years of data this will be inadequate,
+        since block_size=pd.to_timedelta("365.2425D") leaves some tiny remainder of 
+        year for e.g. 10 years, which this hack will deal with. 
 
     Returns
     -------
@@ -56,5 +62,17 @@ def find_block_maxima(data,df_data_tag,df_time_tag='datetime',block_size=pd.to_t
     extremes=extremes.to_frame().reset_index()
     
     extremes.rename(columns={"extreme values":"extreme"}, inplace=True)
+    print(extremes.columns)
+    if leap_year_check==True:
+        print('Running Leap Year double check in detect_extremes.find_block_maxima')
+        years_parsed=np.array(pd.DatetimeIndex(extremes.datetime).year.unique())
+        for i in range(years_parsed.size):
+            ex_ind,=np.where(np.array(pd.DatetimeIndex(extremes.datetime).year) == years_parsed[i])
+            if ex_ind.size>1:
+                print('More than one extreme detected for ',years_parsed[i])
+                remove_ind=extremes.extreme.iloc[ex_ind].idxmin()
+                print('Removing duplicate extreme:')
+                print(extremes.iloc[remove_ind])
+                extremes.drop(index=remove_ind, inplace=True)
     
     return extremes
