@@ -96,7 +96,18 @@ def transform_from_data_scale_to_uniform_margins_using_CDF(data, fit_params, dis
             print(np.sign(number)*(np.abs(number))**(-1.0/fit_params.shape_))
             
             #print(fit_params.shape_)
-    # Other distributions to be implemented
+    
+    elif distribution=='gumbel_r':
+        print('Transforming from data scale to uniform margins for the Gumbel distribution')
+        data_unif=np.full(data.size,np.nan)
+        for i in range(data.size):
+            # 1- G(x) = u
+            # u = data on uniform margins
+            data_unif[i]=1.0 - np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
+            
+    else:
+        print('ERROR: distribution "'+distribution+'" not implemented yet or incorrect spelling')
+        raise NameError(distribution+' distribution not implemented yet or incorrect spelling')
     
     if plot==True:
         fig,ax=plt.subplots(ncols=2,figsize=(8,4))
