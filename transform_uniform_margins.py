@@ -183,7 +183,74 @@ def transform_from_uniform_margins_to_data_scale(data_unif,fit_params, distribut
     
     return data
     
+def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
+    """
+    Function to plot the PDF of extremes and the fitted distribution (left),
+    and comparing the empirically and CDF determined data on uniform
+    margins (right).
+
+    Parameters
+    ----------
+    data : np.array
+        Detected extremes in data scale.
+    data_unif_empirical : np.array
+        Detected extremes converted to uniform margins
+        empirically.
+    data_unif_cdf : np.array
+        Detected extremes converted to uniform margins
+        using the CDF.
+    fit_params : pandas.DataFrame
+        df containing tags including distribution_name,
+        shape_, scale, location
+    data_tag : string
+        name of data to be put in figure captions etc
+
+    Returns
+    -------
+    None.
+
+    """
+    # Initialise figure and axes
+    fig,ax=plt.subplots(ncols=2,figsize=(8,4))
+        
+    # Plot normalised histogram of extremes
+    ax[0].hist(data, bins=25, density=True, rwidth=0.8, color='deepskyblue', label='extremes')
+        
+    # Initialise arrays
+    model_x=np.linspace(np.nanmin(data),np.nanmax(data), 100)
+    model_y=np.full(model_x.size,np.nan)
     
+    # Calculate the PDF at values of x
+    if fit_params.distribution_name[0]=='genextreme':
+        for i in range(model_x.size):
+            model_y[i]=(1/fit_params.scale) * (((1.0 + (fit_params.shape_ * ( (model_x[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_))**(fit_params.shape_+1)) * np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (model_x[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
+    elif fit_params.distribution_name[0]=='gumbel_r':
+        for i in range(model_x.size):
+            model_y[i]=(1/fit_params.scale) * ((np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ))**(fit_params.shape_+1)) * np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
     
+    # Plot the PDF against x
+    ax[0].plot(model_x,model_y, color='darkmagenta', label=fit_params.distribution_name[0])
     
+    # Some decor
+    ax[0].set_ylabel('Normalised Occurrence')
+    ax[0].set_xlabel('Data in data scale')    
+    ax[0].legend(loc='upper right')
+    t=ax[0].text(0.06, 0.94, '(a)', transform=ax[0].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    ax[0].set_title(fit_params.distribution_name[0]+' fit assessment for '+data_tag)
+
+    # Plot normalised histograms of different uniform margins data
+    ax[1].hist(data_unif_cdf, bins=25, density=True, rwidth=0.8, color='darkorange', label='using CDF')
+    ax[1].hist(data_unif_empirical, bins=25, density=True, rwidth=0.8, color='grey', alpha=0.5, label='empirical')
     
+    # Some decor
+    ax[1].set_ylabel('Normalised Occurrence')
+    ax[1].set_xlabel('Data on uniform margins '+data_tag)
+    ax[1].legend(loc='upper right')
+    t=ax[1].text(0.06, 0.94, '(b)', transform=ax[1].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    ax[1].set_title('Comparison of data on uniform margins')
+    
+    fig.tight_layout()
+
+    plt.show()
