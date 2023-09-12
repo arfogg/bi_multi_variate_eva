@@ -62,7 +62,7 @@ def find_block_maxima(data,df_data_tag,df_time_tag='datetime',block_size=pd.to_t
     extremes=extremes.to_frame().reset_index()
     
     extremes.rename(columns={"extreme values":"extreme"}, inplace=True)
-    print(extremes.columns)
+    
     if leap_year_check==True:
         print('Running Leap Year double check in detect_extremes.find_block_maxima')
         years_parsed=np.array(pd.DatetimeIndex(extremes.datetime).year.unique())
