@@ -135,8 +135,8 @@ def transform_from_uniform_margins_to_data_scale(data_unif,fit_params, distribut
     """
     Transform the data from uniform margins back to data scale
     using the CDF. 
-    Distribution is G(x) = some formula
-        1 - G(x) = u
+    CDF Distribution is G(x) = some formula
+        G(x) = u
     where u is on uniform margins, x is in data scale
     So we solve for x.
 
