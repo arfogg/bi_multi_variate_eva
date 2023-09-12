@@ -53,8 +53,8 @@ def transform_from_data_scale_to_uniform_margins_using_CDF(data, fit_params, dis
     """
     Transforms the data to uniform margins by plugging into the CDF
     (a probability integral transform)
-    Distribution is G(x) = some formula
-    1 - G(x) = u
+    CDF Distribution is G(x) = some formula
+    G(x) = u
     where u is on uniform margins, x is in data scale
 
     Parameters
@@ -83,11 +83,15 @@ def transform_from_data_scale_to_uniform_margins_using_CDF(data, fit_params, dis
             # 1- G(x) = u
             # u = data on uniform margins
             
+            
+            # G(x) IS the CDF, so we don't need to do 1- at the beginning
+            
             # Something happens with the math when we do it all in one line.
             # so calculating "number" to the exponent
             #number=(1.0 + (fit_params.shape_.to_numpy() * ( (data[i]-fit_params.location.to_numpy())/(fit_params.scale.to_numpy()) )))
             #data_unif[i]=1.0 - np.exp(-1.0 *np.sign(number)*(np.abs(number))**(-1.0/fit_params.shape_)  )
-            data_unif[i]=1.0 - np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (data[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
+            #data_unif[i]=1.0 - np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (data[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
+            data_unif[i]=np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (data[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
             #print(' ')
             #print(data_unif[i], data[i] )
             #print((-1.0/fit_params.shape_.values[0]))
@@ -103,7 +107,9 @@ def transform_from_data_scale_to_uniform_margins_using_CDF(data, fit_params, dis
         for i in range(data.size):
             # 1- G(x) = u
             # u = data on uniform margins
-            data_unif[i]=1.0 - np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
+            # G(x) IS the CDF, so we don't need to do 1- at the beginning
+            #data_unif[i]=1.0 - np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
+            data_unif[i]=np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
             
     else:
         print('ERROR: distribution "'+distribution+'" not implemented yet or incorrect spelling')
