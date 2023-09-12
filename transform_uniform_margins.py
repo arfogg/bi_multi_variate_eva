@@ -217,7 +217,7 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
     ax[0].hist(data, bins=25, density=True, rwidth=0.8, color='deepskyblue', label='extremes')
         
     # Initialise arrays
-    model_x=np.linspace(np.nanmin(data),np.nanmax(data), 100)
+    model_x=np.linspace(np.nanmin(data),np.nanmax(data), 25)
     model_y=np.full(model_x.size,np.nan)
     
     # Calculate the PDF at values of x
@@ -227,7 +227,10 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
             model_y[i]=(1/fit_params.scale) * (((1.0 + (fit_params.shape_ * ( (model_x[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_))**(fit_params.shape_+1)) * np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (model_x[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
     elif fit_params.distribution_name[0]=='gumbel_r':
         for i in range(model_x.size):
-            model_y[i]=(1/fit_params.scale) * ((np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ))**(fit_params.shape_+1)) * np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
+            #model_y[i]=(1.0/fit_params.scale) * ((np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ))**(fit_params.shape_+1)) * np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
+            model_y[i]=(1.0/fit_params.scale) * np.exp(-1*(((data[i]-fit_params.location)/(fit_params.scale)) + np.exp(-1.0*((data[i]-fit_params.location)/(fit_params.scale)) )))
+            print(model_x[i],model_y[i])
+            
     
     # Plot the PDF against x
     ax[0].plot(model_x,model_y, color='darkmagenta', label=fit_params.distribution_name[0])
