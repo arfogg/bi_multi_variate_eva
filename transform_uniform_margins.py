@@ -164,7 +164,8 @@ def transform_from_uniform_margins_to_data_scale(data_unif,fit_params, distribut
         print('Transforming data from uniform margins to data scale for GEVD distribution')    
         data=np.full(data_unif.size,np.nan)
         for i in range(data.size):
-            data[i]=( (fit_params.scale) / ( fit_params.shape_ * (-np.log(1-data_unif[i])) ** fit_params.shape_ ) )-(fit_params.scale/fit_params.shape_)+(fit_params.location)
+            #data[i]=( (fit_params.scale) / ( fit_params.shape_ * (-np.log(1-data_unif[i])) ** fit_params.shape_ ) )-(fit_params.scale/fit_params.shape_)+(fit_params.location)
+            data[i]=( (fit_params.scale) / ( fit_params.shape_ * (-np.log(data_unif[i])) ** fit_params.shape_ ) )-(fit_params.scale/fit_params.shape_)+(fit_params.location)
     
     
     if plot==True:
