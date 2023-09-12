@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 
 def fit_gevd_or_gumbel(extremes_df,df_data_tag,df_time_tag='datetime',
-                       fitting_type='Emcee', distribution='genextreme'):
+                       fitting_type='Emcee'):
     """
     Function to fit a GEVD or GUMBEL distribution to preselected extremes.
 
@@ -28,9 +28,6 @@ def fit_gevd_or_gumbel(extremes_df,df_data_tag,df_time_tag='datetime',
     fitting_type : string, optional
         Fitting method to use for fitting the model. The default
         is 'Emcee', other valid option is 'MLE'.
-    distribution : string, optional
-        Distribution to fit extremes to. The default is 'genextreme', other option
-        is 'gumbel_r'. These are suitable for block_maxima selected extremes only.
 
     Raises
     ------

@@ -221,6 +221,7 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
     model_y=np.full(model_x.size,np.nan)
     
     # Calculate the PDF at values of x
+    # PDF of distributions from wikipedia
     if fit_params.distribution_name[0]=='genextreme':
         for i in range(model_x.size):
             model_y[i]=(1/fit_params.scale) * (((1.0 + (fit_params.shape_ * ( (model_x[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_))**(fit_params.shape_+1)) * np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (model_x[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
