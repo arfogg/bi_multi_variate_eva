@@ -192,7 +192,42 @@ def transform_from_uniform_margins_to_data_scale(data_unif,fit_params, plot=Fals
         plt.show()
     
     return data
-    
+
+def estimate_pdf(x_data,fit_params):
+    """
+    Function to estimate the values of the PDF for GEVD
+    and Gumbel distributions
+
+    Parameters
+    ----------
+    x_data : np.array
+        X values at which PDF will be calculated
+    fit_params : pd.DataFrame
+        df containing tags including distribution_name,
+        shape_, scale, location
+
+    Returns
+    -------
+    pdf : np.array
+        Value of PDF along x_data
+
+    """
+
+    pdf=np.full(x_data.size,np.nan)
+    # Calculate the PDF at values of x
+    # PDF of distributions from wikipedia
+    if fit_params.distribution_name[0]=='genextreme':
+        print('Estimating PDF for GEVD distribution')
+        for i in range(pdf.size):
+            pdf[i]=(1/fit_params.scale) * (((1.0 + (fit_params.shape_ * ( (x_data[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_))**(fit_params.shape_+1)) * np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (x_data[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
+    elif fit_params.distribution_name[0]=='gumbel_r':
+        print('Estimating PDF for Gumbel distribution')
+        for i in range(pdf.size):
+            #model_y[i]=(1.0/fit_params.scale) * ((np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ))**(fit_params.shape_+1)) * np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
+            pdf[i]=(1.0/fit_params.scale) * ( np.exp(-1*(((x_data[i]-fit_params.location)/(fit_params.scale)) + np.exp(-1.0*((x_data[i]-fit_params.location)/(fit_params.scale)) ))) )
+
+    return pdf
+
 def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
     """
     Function to plot the PDF of extremes and the fitted distribution (left),
@@ -228,20 +263,7 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
         
     # Initialise arrays
     model_x=np.linspace(np.nanmin(data),np.nanmax(data), 100)
-    model_y=np.full(model_x.size,np.nan)
-    
-    # Calculate the PDF at values of x
-    # PDF of distributions from wikipedia
-    if fit_params.distribution_name[0]=='genextreme':
-        print('Estimating PDF for GEVD distribution')
-        for i in range(model_x.size):
-            model_y[i]=(1/fit_params.scale) * (((1.0 + (fit_params.shape_ * ( (model_x[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_))**(fit_params.shape_+1)) * np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (model_x[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
-    elif fit_params.distribution_name[0]=='gumbel_r':
-        print('Estimating PDF for Gumbel distribution')
-        for i in range(model_x.size):
-            #model_y[i]=(1.0/fit_params.scale) * ((np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ))**(fit_params.shape_+1)) * np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
-            model_y[i]=(1.0/fit_params.scale) * ( np.exp(-1*(((model_x[i]-fit_params.location)/(fit_params.scale)) + np.exp(-1.0*((model_x[i]-fit_params.location)/(fit_params.scale)) ))) )
-            
+    model_y=estimate_pdf(model_x,fit_params)
     
     # Plot the PDF against x
     ax[0].plot(model_x,model_y, color='darkmagenta', label=fit_params.distribution_name[0])
@@ -269,3 +291,68 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
     fig.tight_layout()
 
     plt.show()
+    
+def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale, y_sample_data_scale, x_fit_params, y_fit_params, x_name, y_name):
+    
+    fig, ax=plt.subplots(nrows=2,ncols=2, figsize=(7,7))
+    
+    # FOR X PARAMETER
+    # Plot normalised histogram of copula sample in data scale
+    ax[0,0].hist(x_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label='x copula sample\n(data scale)')
+    
+    # Overplot distribution
+    model_x=np.linspace(np.nanmin(x_sample_data_scale),np.nanmax(x_sample_data_scale), 100)
+    model_y=estimate_pdf(model_x,x_fit_params)
+    ax[0,0].plot(model_x,model_y, color='darkmagenta', label=x_fit_params.distribution_name[0])
+    
+    # Some decor
+    ax[0,0].set_xlabel('Data scale for '+x_name)
+    ax[0,0].set_ylabel('Normalised Occurrence')
+    ax[0,0].set_title('Copula sample vs '+x_fit_params.distribution_name[0]+' (data scale)')
+    t=ax[0,0].text(0.06, 0.94, '(a)', transform=ax[0,0].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    ax[0,0].legend(loc='upper right')
+    
+    # Plot normalised histogram of copula sample on uniform margins
+    ax[0,1].hist(copula_x_sample, bins=25, density=True, rwidth=0.8, color='darkorange', label='copula sample')
+
+    # Some decor
+    ax[0,1].set_xlabel('Copula sample for '+x_name)
+    ax[0,1].set_ylabel('Normalised Occurrence')
+    ax[0,1].set_title('Copula sample on uniform margins')
+    t=ax[0,1].text(0.06, 0.94, '(b)', transform=ax[0,1].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    ax[0,1].legend(loc='upper right')    
+
+    # FOR Y PARAMETER
+    # Plot normalised histogram of copula sample in data scale
+    ax[1,0].hist(y_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label='y copula sample\n(data scale)')
+    
+    # Overplot distribution
+    model_x=np.linspace(np.nanmin(y_sample_data_scale),np.nanmax(y_sample_data_scale), 100)
+    model_y=estimate_pdf(model_x,y_fit_params)
+    ax[1,0].plot(model_x,model_y, color='darkmagenta', label=y_fit_params.distribution_name[0])
+    
+    # Some decor
+    ax[1,0].set_xlabel('Data scale for '+y_name)
+    ax[1,0].set_ylabel('Normalised Occurrence')
+    ax[1,0].set_title('Copula sample vs '+y_fit_params.distribution_name[0]+' (data scale)')
+    t=ax[1,0].text(0.06, 0.94, '(c)', transform=ax[1,0].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    ax[1,0].legend(loc='upper right')    
+    
+    # Plot normalised histogram of copula sample on uniform margins
+    ax[1,1].hist(copula_y_sample, bins=25, density=True, rwidth=0.8, color='darkorange', label='copula sample')
+
+    # Some decor
+    ax[1,1].set_xlabel('Copula sample for '+y_name)
+    ax[1,1].set_ylabel('Normalised Occurrence')
+    ax[1,1].set_title('Copula sample on uniform margins')
+    t=ax[1,1].text(0.06, 0.94, '(d)', transform=ax[1,1].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    ax[1,1].legend(loc='upper right')
+    
+    fig.tight_layout()
+    
+    plt.show()
+    
