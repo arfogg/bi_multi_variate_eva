@@ -135,7 +135,7 @@ def transform_from_data_scale_to_uniform_margins_using_CDF(data, fit_params, dis
     return data_unif
     
 
-def transform_from_uniform_margins_to_data_scale(data_unif,fit_params, distribution='genextreme', plot=False):
+def transform_from_uniform_margins_to_data_scale(data_unif,fit_params, plot=False):
     """
     Transform the data from uniform margins back to data scale
     using the CDF. 
@@ -148,10 +148,9 @@ def transform_from_uniform_margins_to_data_scale(data_unif,fit_params, distribut
     ----------
     data_unif : np.array
         Data on uniform margins.
-    fit_params : df
-        For distribution='genextreme', must contain parameters scale, shape_, location.
-    distribution : TYPE, optional
-        DESCRIPTION. The default is 'genextreme'.
+    fit_params : pd.DataFrame
+        df containing tags including distribution_name,
+        shape_, scale, location
     plot : TYPE, optional
         DESCRIPTION. The default is False.
 
@@ -162,15 +161,22 @@ def transform_from_uniform_margins_to_data_scale(data_unif,fit_params, distribut
 
     """
     
+    data=np.full(data_unif.size,np.nan)
     
-    if distribution=='genextreme':
+    if fit_params.distribution_name[0]=='genextreme':
         # For the GEVD distribution
         print('Transforming data from uniform margins to data scale for GEVD distribution')    
-        data=np.full(data_unif.size,np.nan)
+        
         for i in range(data.size):
             #data[i]=( (fit_params.scale) / ( fit_params.shape_ * (-np.log(1-data_unif[i])) ** fit_params.shape_ ) )-(fit_params.scale/fit_params.shape_)+(fit_params.location)
             data[i]=( (fit_params.scale) / ( fit_params.shape_ * (-np.log(data_unif[i])) ** fit_params.shape_ ) )-(fit_params.scale/fit_params.shape_)+(fit_params.location)
-    
+    elif fit_params.distribution_name[0]=="gumbel_r":
+        # For the Gumbel distribution
+        print('Transforming data from uniform margins to data scale for Gumbel distribution')
+        for i in range(data.size):
+            #!!! need to get this eqn/derivation checked !!!
+            data[i]=fit_params.location - (fit_params.scale * np.log(-1.0*np.log(data_unif[i])))
+        
     
     if plot==True:
         fig,ax=plt.subplots(ncols=2,figsize=(8,4))
