@@ -91,6 +91,8 @@ def transform_from_data_scale_to_uniform_margins_using_CDF(data, fit_params, dis
             #number=(1.0 + (fit_params.shape_.to_numpy() * ( (data[i]-fit_params.location.to_numpy())/(fit_params.scale.to_numpy()) )))
             #data_unif[i]=1.0 - np.exp(-1.0 *np.sign(number)*(np.abs(number))**(-1.0/fit_params.shape_)  )
             #data_unif[i]=1.0 - np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (data[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
+            
+            # Citation for this equation Coles (2001) page 47
             data_unif[i]=np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (data[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
             #print(' ')
             #print(data_unif[i], data[i] )
@@ -109,6 +111,8 @@ def transform_from_data_scale_to_uniform_margins_using_CDF(data, fit_params, dis
             # u = data on uniform margins
             # G(x) IS the CDF, so we don't need to do 1- at the beginning
             #data_unif[i]=1.0 - np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
+            
+            # Citation for this equation, Coles (2001) page 48
             data_unif[i]=np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
             
     else:
@@ -217,19 +221,20 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
     ax[0].hist(data, bins=25, density=True, rwidth=0.8, color='deepskyblue', label='extremes')
         
     # Initialise arrays
-    model_x=np.linspace(np.nanmin(data),np.nanmax(data), 25)
+    model_x=np.linspace(np.nanmin(data),np.nanmax(data), 100)
     model_y=np.full(model_x.size,np.nan)
     
     # Calculate the PDF at values of x
     # PDF of distributions from wikipedia
     if fit_params.distribution_name[0]=='genextreme':
+        print('Estimating PDF for GEVD distribution')
         for i in range(model_x.size):
             model_y[i]=(1/fit_params.scale) * (((1.0 + (fit_params.shape_ * ( (model_x[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_))**(fit_params.shape_+1)) * np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (model_x[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
     elif fit_params.distribution_name[0]=='gumbel_r':
+        print('Estimating PDF for Gumbel distribution')
         for i in range(model_x.size):
             #model_y[i]=(1.0/fit_params.scale) * ((np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ))**(fit_params.shape_+1)) * np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
-            model_y[i]=(1.0/fit_params.scale) * np.exp(-1*(((data[i]-fit_params.location)/(fit_params.scale)) + np.exp(-1.0*((data[i]-fit_params.location)/(fit_params.scale)) )))
-            print(model_x[i],model_y[i])
+            model_y[i]=(1.0/fit_params.scale) * ( np.exp(-1*(((model_x[i]-fit_params.location)/(fit_params.scale)) + np.exp(-1.0*((model_x[i]-fit_params.location)/(fit_params.scale)) ))) )
             
     
     # Plot the PDF against x
