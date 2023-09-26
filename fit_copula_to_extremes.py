@@ -69,3 +69,53 @@ def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes, x_sample,
     ax.legend()
     
     plt.show()
+    
+    csize=15
+    fig, ax=plt.subplots(ncols=2, figsize=(18,7))
+    
+    # OBSERVED EXTREMES
+    h_data=ax[0].hist2d(x_extremes, y_extremes, bins=[10,10], cmap='magma', cmin=1)
+    
+    # Some decor
+    ax[0].set_xlabel(x_name, fontsize=csize)
+    ax[0].set_ylabel(y_name, fontsize=csize)  
+    for label in (ax[0].get_xticklabels() + ax[0].get_yticklabels()):
+        label.set_fontsize(csize)
+    ax[0].set_facecolor('darkgray')
+    t_data=ax[0].text(0.06, 0.94, '(a)', transform=ax[0].transAxes, fontsize=csize,  va='top', ha='left')
+    t_data.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    ax[0].set_title('Observed Extremes', fontsize=csize)
+    
+    # Colourbar
+    cbar_data=fig.colorbar(h_data[3], ax=ax[0])
+    cbar_data.set_label('Occurrence', fontsize=csize)
+    cbar_data.ax.tick_params(labelsize=csize)
+
+    
+    return x_sample,y_sample
+    
+
+    # COPULA SAMPLE
+
+    h_sample=ax[1].hist2d(x_sample, y_sample, bins=[10,10], cmap='magma', cmin=1)
+    
+    # Some decor
+    ax[1].set_xlabel(x_name, fontsize=csize)
+    ax[1].set_ylabel(y_name, fontsize=csize)  
+    for label in (ax[1].get_xticklabels() + ax[1].get_yticklabels()):
+        label.set_fontsize(csize)
+    ax[1].set_facecolor('darkgray')
+    t_data=ax[1].text(0.06, 0.94, '(b)', transform=ax[1].transAxes, fontsize=csize,  va='top', ha='left')
+    t_data.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    ax[1].set_title('Copula Sample (data scale)', fontsize=csize)
+    
+    # Colourbar
+    cbar_sample=fig.colorbar(h_sample[3], ax=ax[1])
+    cbar_sample.set_label('Occurrence', fontsize=csize)
+    cbar_sample.ax.tick_params(labelsize=csize)
+    
+    # OBSERVED - COPULA
+    
+    
+    
+    
