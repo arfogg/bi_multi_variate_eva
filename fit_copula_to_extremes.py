@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from copulas.multivariate import GaussianMultivariate
+from copulas.bivariate import Bivariate
 
 def fit_copula_bivariate(x_extremes, y_extremes, x_name, y_name):
     """
@@ -41,14 +42,23 @@ def fit_copula_bivariate(x_extremes, y_extremes, x_name, y_name):
         print('x_extremes and y_extremes must have the same length')
         raise NameError('x_extremes and y_extremes must have the same length')
     
-    # Format the extremes to how copulas wants them
-    copula_df=pd.DataFrame({x_name:x_extremes,
-                            y_name:y_extremes})
+    # # Format the extremes to how copulas wants them
+    # copula_df=pd.DataFrame({x_name:x_extremes,
+    #                         y_name:y_extremes})
     
-    # Initialise the copula - testing with GaussianMultivariate
-    copula = GaussianMultivariate()
-    # Fit copula to the extremes
-    copula.fit(copula_df)
+    # # Initialise the copula - testing with GaussianMultivariate
+    # copula = GaussianMultivariate()
+    # # Fit copula to the extremes
+    # copula.fit(copula_df)
+    
+    # Format the extremes to how copulas wants them
+    copula_arr=np.array([x_extremes,y_extremes]).T
+    
+    # Initialise the copula - testing with gumbel (options are clayton, frank, gumbel or independence)
+    copula=Bivariate(copula_type='gumbel')
+    
+    # Fit the copula to the extremes
+    copula.fit(copula_arr)
     
     return copula
 
@@ -56,20 +66,7 @@ def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes, x_sample,
                                     y_sample, x_name, y_name):
     
     
-    fig,ax=plt.subplots()
-    
-    # Plot detected extremes
-    ax.plot(x_extremes, y_extremes,linewidth=0.0,marker='^', fillstyle='none', color='black', label='data')
-    ax.set_xlabel(x_name)
-    ax.set_ylabel(y_name)
-    
-    
-    ax.plot(x_sample,y_sample, linewidth=0.0, marker='o', fillstyle='none', color='purple', label='copula sample')
-    
-    ax.legend()
-    
-    plt.show()
-    
+   
     csize=15
     fig, ax=plt.subplots(ncols=2, figsize=(18,7))
     
@@ -92,7 +89,7 @@ def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes, x_sample,
     cbar_data.ax.tick_params(labelsize=csize)
 
     
-    return x_sample,y_sample
+    #return x_sample,y_sample
     
 
     # COPULA SAMPLE

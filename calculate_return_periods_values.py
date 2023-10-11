@@ -76,7 +76,8 @@ def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_n
     raveled_mid_point_x=mid_point_x.ravel()
     raveled_mid_point_y=mid_point_y.ravel()
 
-    sample_grid=pd.DataFrame({x_name:raveled_mid_point_x, y_name:raveled_mid_point_y})
+    #sample_grid=pd.DataFrame({x_name:raveled_mid_point_x, y_name:raveled_mid_point_y})
+    sample_grid=np.array([raveled_mid_point_x,raveled_mid_point_y]).T
     return_period=calculate_return_period(copula, sample_grid, block_size=block_size)
 
     shaped_return_period=return_period.reshape(mid_point_x.shape)
