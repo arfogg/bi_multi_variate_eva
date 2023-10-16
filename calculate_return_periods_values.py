@@ -41,7 +41,8 @@ def calculate_return_period(copula, sample, block_size=pd.to_timedelta("365.2425
     # Calculate the number of extremes in a year
     n_extremes_per_year=pd.to_timedelta("365.2425D")/block_size
     
-    # Calculate the return period
+    # Calculate the return period (in years!)
+    # See Coles 2001 textbook pages 81-82
     return_period=(1.0/n_extremes_per_year)*(1.0/(1-CDF))
     
     return return_period
@@ -83,7 +84,7 @@ def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_n
     pcm=ax.pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma', norm=colors.LogNorm(vmin=shaped_return_period.min(),
                   vmax=shaped_return_period.max()*0.60))
     # Colourbar
-    fig.colorbar(pcm, ax=ax, extend='max', label='Return Period (units??)')
+    fig.colorbar(pcm, ax=ax, extend='max', label='Return Period (years)')
     
     # Some Decor
     ax.set_xlabel(x_name)
