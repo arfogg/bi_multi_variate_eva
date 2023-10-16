@@ -49,7 +49,6 @@ def calculate_return_period(copula, sample, block_size=pd.to_timedelta("365.2425
 def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_name,x_gevd_fit_params, y_gevd_fit_params,
                                        n_samples=1000,block_size=pd.to_timedelta("365.2425D")):
     
-    # !!! should not be transformed empirically!!!
     # Create a sample
     sample_um=pd.DataFrame({x_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_x,max_x,n_samples)),
                          y_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_y,max_y,n_samples))})
@@ -61,71 +60,32 @@ def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_n
     xv_ds, yv_ds = np.meshgrid(sample_ds[x_name], sample_ds[y_name])    #data scale
     # mesh grid on uniform margins for calculating, in data scale
     #   for plotting
-    
-    
-    # sample_grid=pd.DataFrame({x_name:xv.ravel(), y_name:yv.ravel()})
-    # # Calculate the return period
-    # return_period=calculate_return_period(copula, sample_grid, block_size=block_size)
-
-    # # Initialise plotting window
-    # fig,ax=plt.subplots()
-    
-    # # Plot return period as a function of x and y
-    # ax.scatter(sample_grid[x_name], sample_grid[y_name], c=return_period, norm='linear')
-    
-    # plt.show()
-    
-    
+      
+    # Determine mid point of each pixel to calculate return
+    #   period for
     mid_point_x_um=(xv_um[1:,1:]+xv_um[:-1,:-1])/2
     mid_point_y_um=(yv_um[1:,1:]+yv_um[:-1,:-1])/2
-    # mid_point_x_ds=(xv_ds[1:,1:]+xv_ds[:-1,:-1])/2
-    # mid_point_y_ds=(yv_ds[1:,1:]+yv_ds[:-1,:-1])/2
 
-
+    # Reshape
     raveled_mid_point_x=mid_point_x_um.ravel()
     raveled_mid_point_y=mid_point_y_um.ravel()
-
-    #sample_grid=pd.DataFrame({x_name:raveled_mid_point_x, y_name:raveled_mid_point_y})
     sample_grid=np.array([raveled_mid_point_x,raveled_mid_point_y]).T
+    
+    # Calculate return period
     return_period=calculate_return_period(copula, sample_grid, block_size=block_size)
-
+    # Reshape for mesh grid
     shaped_return_period=return_period.reshape(mid_point_x_um.shape)
 
-
-
-
+    # Initialise plot
     fig,ax=plt.subplots()
-
-    #print(xv.shape, yv.shape, shaped_return_period.shape)
+    
+    # Plot return period as function of x and y in data scale
     pcm=ax.pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma', norm=colors.LogNorm(vmin=shaped_return_period.min(),
                   vmax=shaped_return_period.max()*0.60))
-    
+    # Colourbar
     fig.colorbar(pcm, ax=ax, extend='max', label='Return Period (units??)')
     
     # Some Decor
     ax.set_xlabel(x_name)
     ax.set_ylabel(y_name)
-    
-    # # Convert axes labels from uniform margins to data scale
-    # xticks=transform_uniform_margins.transform_from_uniform_margins_to_data_scale(np.array(ax.get_xticks()),x_gevd_fit_params, plot=False)
-    # yticks=transform_uniform_margins.transform_from_uniform_margins_to_data_scale(np.array(ax.get_yticks()),y_gevd_fit_params, plot=False)
-    
-    # ax.set_xticks(ax.get_xticks(),labels=xticks)
-    # ax.set_yticks(ax.get_yticks(),labels=yticks)
-    
-    
-    
-    
-    #THIS BELOW WORKED, BUT TICKS AREN'T EVENLY SPACED
-    # THEY ARE EVENLY SPACED IN UNIFORM MARGINS
-    # SO WE NEED TO DETERMINE BOX EDGES IN DATA SCALE THEN CONVERT
-    
-    # # Determine new axis labels, equally spaced in data scale
-    # rounded_min_x=round(min_x*1.1,-1) if min_x>=10.0 else round(min_x*1.1,0)
-    # rounded_max_x=round(max_x*0.9,-1) if max_x>=10.0 else round(max_x*0.9,0)
-    # xticks_data_scale=np.linspace(rounded_min_x,rounded_max_x,5)
-    # xticks_uniform_margins=transform_uniform_margins.transform_from_data_scale_to_uniform_margins_using_CDF(xticks_data_scale, x_gevd_fit_params, distribution=x_gevd_fit_params.distribution_name[0], plot=False)
-    # print(xticks_data_scale)
-    # print(xticks_uniform_margins)
-    # ax.set_xticks(xticks_uniform_margins,labels=xticks_data_scale)
-    
+     
