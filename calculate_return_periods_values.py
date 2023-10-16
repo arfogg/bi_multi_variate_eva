@@ -48,7 +48,8 @@ def calculate_return_period(copula, sample, block_size=pd.to_timedelta("365.2425
     return return_period
 
 def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_name,x_gevd_fit_params, y_gevd_fit_params,
-                                       n_samples=1000,block_size=pd.to_timedelta("365.2425D")):
+                                       n_samples=1000,block_size=pd.to_timedelta("365.2425D"),
+                                       contour_levels=[1/12,0.5,1.0,10.0]):
     
     # Create a sample
     sample_um=pd.DataFrame({x_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_x,max_x,n_samples)),
@@ -66,6 +67,8 @@ def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_n
     #   period for
     mid_point_x_um=(xv_um[1:,1:]+xv_um[:-1,:-1])/2
     mid_point_y_um=(yv_um[1:,1:]+yv_um[:-1,:-1])/2
+    mid_point_x_ds=(xv_ds[1:,1:]+xv_ds[:-1,:-1])/2
+    mid_point_y_ds=(yv_ds[1:,1:]+yv_ds[:-1,:-1])/2
 
     # Reshape
     raveled_mid_point_x=mid_point_x_um.ravel()
@@ -83,6 +86,11 @@ def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_n
     # Plot return period as function of x and y in data scale
     pcm=ax.pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma', norm=colors.LogNorm(vmin=shaped_return_period.min(),
                   vmax=shaped_return_period.max()*0.60))
+    
+    # Contours
+    contours=ax.contour(mid_point_x_ds,mid_point_y_ds,shaped_return_period, contour_levels, colors='white')
+    ax.clabel(contours, inline=True)
+    
     # Colourbar
     fig.colorbar(pcm, ax=ax, extend='max', label='Return Period (years)')
     
