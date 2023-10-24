@@ -15,6 +15,8 @@ import matplotlib as mpl
 
 from matplotlib.gridspec import GridSpec
 
+import transform_uniform_margins
+
 # R code by Daire
 # set.seed(12)
 
@@ -124,8 +126,10 @@ def plot_extremal_dependence_coefficient(x_data,y_data, x_name, y_name, x_units,
     cb_data.set_label("Normalised occurrence", fontsize=csize)
     
     # Transform the variables into "uniform" - ask Daire
-    x_unif=scipy.stats.rankdata(x_data)/(x_data.size+1)
-    y_unif=scipy.stats.rankdata(y_data)/(y_data.size+1)
+    #x_unif=scipy.stats.rankdata(x_data)/(x_data.size+1)
+    x_unif=transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(x_data,plot=False)
+    #y_unif=scipy.stats.rankdata(y_data)/(y_data.size+1)
+    y_unif=transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(y_data,plot=False)
     # PLOT X_UNIF AS FUNCTION OF X_DATA TO GET VISUALISATION OF EMPIRICAL CDF
     
     
@@ -166,7 +170,13 @@ def plot_extremal_dependence_coefficient(x_data,y_data, x_name, y_name, x_units,
     for label in (ax_edc.get_xticklabels() + ax_edc.get_yticklabels()):
         label.set_fontsize(csize)
     
+    t=ax_edc.text(0.95, 0.95, '$\chi _{min}$ = '+str(round(np.min(chi),3)), transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='right')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+
+    
     fig.tight_layout()
+    
+    return fig, ax_data, ax_data_unif, ax_edc
     
 def test_plot_edc():
     
