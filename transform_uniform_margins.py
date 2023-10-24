@@ -292,6 +292,8 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
 
     plt.show()
     
+    return fig, ax
+    
 def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale, y_sample_data_scale, x_fit_params, y_fit_params, x_name, y_name):
     
     fig, ax=plt.subplots(nrows=2,ncols=2, figsize=(7,7))
