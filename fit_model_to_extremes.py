@@ -71,7 +71,7 @@ def fit_gevd_or_gumbel(extremes_df,extremes_method,extremes_type,
     
     # Fit a model to the extremes
     eva.fit_model(model=fitting_type)
-    eva.plot_diagnostic()
+    
     # Extract fit parameters
     fit_params=pd.DataFrame(eva.model.fit_parameters, index=[0])
     fit_params.rename(columns={'c':'shape_', 'loc':'location'}, inplace=True)

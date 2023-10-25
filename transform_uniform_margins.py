@@ -60,6 +60,9 @@ def transform_from_data_scale_to_uniform_margins_using_CDF(data, fit_params, dis
     G(x) = u
     where u is on uniform margins, x is in data scale
 
+    Citation for this equation Coles (2001) page 47
+    
+
     Parameters
     ----------
     data : np.array
@@ -81,42 +84,30 @@ def transform_from_data_scale_to_uniform_margins_using_CDF(data, fit_params, dis
     
     if distribution=='genextreme':
         print('Transforming from data scale to uniform margins for GEVD distribution')
-        data_unif=np.full(data.size,np.nan)
-        for i in range(data.size):
+        # data_unif=np.full(data.size,np.nan)
+        # for i in range(data.size):
             # 1- G(x) = u
             # u = data on uniform margins
             
-            
             # G(x) IS the CDF, so we don't need to do 1- at the beginning
+                        
+            # # Citation for this equation Coles (2001) page 47
+            # data_unif[i]=np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (data[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
+        data_unif=genextreme.cdf(data, fit_params.shape_, loc=fit_params.location, scale=fit_params.scale)    
             
-            # Something happens with the math when we do it all in one line.
-            # so calculating "number" to the exponent
-            #number=(1.0 + (fit_params.shape_.to_numpy() * ( (data[i]-fit_params.location.to_numpy())/(fit_params.scale.to_numpy()) )))
-            #data_unif[i]=1.0 - np.exp(-1.0 *np.sign(number)*(np.abs(number))**(-1.0/fit_params.shape_)  )
-            #data_unif[i]=1.0 - np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (data[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
-            
-            # Citation for this equation Coles (2001) page 47
-            data_unif[i]=np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (data[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
-            #print(' ')
-            #print(data_unif[i], data[i] )
-            #print((-1.0/fit_params.shape_.values[0]))
-            #print(number)
-            #print(number**(-1.0/fit_params.shape_.values[0]))
-            #print(np.sign(number)*(np.abs(number))**(-1.0/fit_params.shape_))
-            
-            #print(fit_params.shape_)
     
     elif distribution=='gumbel_r':
         print('Transforming from data scale to uniform margins for the Gumbel distribution')
-        data_unif=np.full(data.size,np.nan)
-        for i in range(data.size):
-            # 1- G(x) = u
-            # u = data on uniform margins
-            # G(x) IS the CDF, so we don't need to do 1- at the beginning
-            #data_unif[i]=1.0 - np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
+        # data_unif=np.full(data.size,np.nan)
+        # for i in range(data.size):
+        #     # 1- G(x) = u
+        #     # u = data on uniform margins
+        #     # G(x) IS the CDF, so we don't need to do 1- at the beginning
+        #     #data_unif[i]=1.0 - np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
             
-            # Citation for this equation, Coles (2001) page 48
-            data_unif[i]=np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
+        #     # Citation for this equation, Coles (2001) page 48
+        #     data_unif[i]=np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
+        data_unif=gumbel_r.cdf(data,loc=fit_params.location, scale=fit_params.scale)
             
     else:
         print('ERROR: distribution "'+distribution+'" not implemented yet or incorrect spelling')
@@ -216,25 +207,14 @@ def estimate_pdf(x_data,fit_params):
 
     """
 
-    pdf=np.full(x_data.size,np.nan)
-    print(fit_params.scale[0],fit_params.shape_[0],fit_params.location[0])
     # Calculate the PDF at values of x
     # PDF of distributions from wikipedia
     if fit_params.distribution_name[0]=='genextreme':
         print('Estimating PDF for GEVD distribution')
-        # for i in range(pdf.size):
-        #     pdf[i]=(1/fit_params.scale[0]) * (((1.0 + (fit_params.shape_[0] * ( (x_data[i]-fit_params.location[0])/(fit_params.scale[0]) )))**(-1.0/fit_params.shape_[0]))**(fit_params.shape_[0]+1)) * np.exp(-1.0 * (1.0 + (fit_params.shape_[0] * ( (x_data[i]-fit_params.location[0])/(fit_params.scale[0]) )))**(-1.0/fit_params.shape_[0])  )
-        #     print(' ')
-        #     print(x_data[i])
-        #     print(1/fit_params.scale[0], '*', (((1.0 + (fit_params.shape_[0] * ( (x_data[i]-fit_params.location[0])/(fit_params.scale[0]) )))**(-1.0/fit_params.shape_[0]))**(fit_params.shape_[0]+1)), '*', np.exp(-1.0 * (1.0 + (fit_params.shape_[0] * ( (x_data[i]-fit_params.location[0])/(fit_params.scale[0]) )))**(-1.0/fit_params.shape_[0])  ))
-        #     print(pdf[i])
-        pdf=genextreme.pdf(x_data, fit_params.shape_, fit_params.location, fit_params.scale)
+        pdf=genextreme.pdf(x_data, fit_params.shape_, loc=fit_params.location, scale=fit_params.scale)
     elif fit_params.distribution_name[0]=='gumbel_r':
         print('Estimating PDF for Gumbel distribution')
-        # for i in range(pdf.size):
-        #     #model_y[i]=(1.0/fit_params.scale) * ((np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ))**(fit_params.shape_+1)) * np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
-        #     pdf[i]=(1.0/fit_params.scale) * ( np.exp(-1*(((x_data[i]-fit_params.location)/(fit_params.scale)) + np.exp(-1.0*((x_data[i]-fit_params.location)/(fit_params.scale)) ))) )
-        pdf=gumbel_r.pdf(x_data, fit_params.location, fit_params.scale)
+        pdf=gumbel_r.pdf(x_data, loc=fit_params.location, scale=fit_params.scale)
         
     return pdf
 
