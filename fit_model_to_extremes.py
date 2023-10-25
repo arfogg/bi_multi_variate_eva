@@ -10,8 +10,9 @@ import pyextremes
 import pandas as pd
 import numpy as np
 
-def fit_gevd_or_gumbel(extremes_df,df_data_tag,df_time_tag='datetime',
-                       fitting_type='Emcee'):
+def fit_gevd_or_gumbel(extremes_df,extremes_method,extremes_type,
+                       df_data_tag,df_time_tag='datetime',
+                       fitting_type='Emcee', block_size=None):
     """
     Function to fit a GEVD or GUMBEL distribution to preselected extremes.
 
@@ -20,6 +21,12 @@ def fit_gevd_or_gumbel(extremes_df,df_data_tag,df_time_tag='datetime',
     extremes_df : pd.DataFrame
         DataFrame containing a column with pd.Timestamp and a data column to 
         extract extremes from
+    extremes_method : string
+        String describing whether extremes were selected by block maxima
+        or points over threshold. Valid options 'BM' or 'POT'
+    extremes_type : string
+        String describing whether extremes are minima or maxima, valid options
+        'high' or 'low'.
     df_data_tag : string
         Tag describing the column of data which extremes should be extracted from.
     df_time_tag : TYPE, optional
@@ -28,6 +35,10 @@ def fit_gevd_or_gumbel(extremes_df,df_data_tag,df_time_tag='datetime',
     fitting_type : string, optional
         Fitting method to use for fitting the model. The default
         is 'Emcee', other valid option is 'MLE'.
+    block_size : pd.Timedelta or None
+        Block size over which individual extremes have been found. The default is 
+        None.
+    extr
 
     Raises
     ------
@@ -60,7 +71,7 @@ def fit_gevd_or_gumbel(extremes_df,df_data_tag,df_time_tag='datetime',
     
     # Fit a model to the extremes
     eva.fit_model(model=fitting_type)
-    
+    eva.plot_diagnostic()
     # Extract fit parameters
     fit_params=pd.DataFrame(eva.model.fit_parameters, index=[0])
     fit_params.rename(columns={'c':'shape_', 'loc':'location'}, inplace=True)

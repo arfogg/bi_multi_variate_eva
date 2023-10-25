@@ -10,6 +10,9 @@ import scipy
 import numpy as np
 import matplotlib.pyplot as plt
 
+from scipy.stats import genextreme
+from scipy.stats import gumbel_r
+
 def transform_from_data_scale_to_uniform_margins_empirically(data, plot=False):
     """
     Transform the data to uniform margins empirically
@@ -214,18 +217,25 @@ def estimate_pdf(x_data,fit_params):
     """
 
     pdf=np.full(x_data.size,np.nan)
+    print(fit_params.scale[0],fit_params.shape_[0],fit_params.location[0])
     # Calculate the PDF at values of x
     # PDF of distributions from wikipedia
     if fit_params.distribution_name[0]=='genextreme':
         print('Estimating PDF for GEVD distribution')
-        for i in range(pdf.size):
-            pdf[i]=(1/fit_params.scale) * (((1.0 + (fit_params.shape_ * ( (x_data[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_))**(fit_params.shape_+1)) * np.exp(-1.0 * (1.0 + (fit_params.shape_ * ( (x_data[i]-fit_params.location)/(fit_params.scale) )))**(-1.0/fit_params.shape_)  )
+        # for i in range(pdf.size):
+        #     pdf[i]=(1/fit_params.scale[0]) * (((1.0 + (fit_params.shape_[0] * ( (x_data[i]-fit_params.location[0])/(fit_params.scale[0]) )))**(-1.0/fit_params.shape_[0]))**(fit_params.shape_[0]+1)) * np.exp(-1.0 * (1.0 + (fit_params.shape_[0] * ( (x_data[i]-fit_params.location[0])/(fit_params.scale[0]) )))**(-1.0/fit_params.shape_[0])  )
+        #     print(' ')
+        #     print(x_data[i])
+        #     print(1/fit_params.scale[0], '*', (((1.0 + (fit_params.shape_[0] * ( (x_data[i]-fit_params.location[0])/(fit_params.scale[0]) )))**(-1.0/fit_params.shape_[0]))**(fit_params.shape_[0]+1)), '*', np.exp(-1.0 * (1.0 + (fit_params.shape_[0] * ( (x_data[i]-fit_params.location[0])/(fit_params.scale[0]) )))**(-1.0/fit_params.shape_[0])  ))
+        #     print(pdf[i])
+        pdf=genextreme.pdf(x_data, fit_params.shape_, fit_params.location, fit_params.scale)
     elif fit_params.distribution_name[0]=='gumbel_r':
         print('Estimating PDF for Gumbel distribution')
-        for i in range(pdf.size):
-            #model_y[i]=(1.0/fit_params.scale) * ((np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ))**(fit_params.shape_+1)) * np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
-            pdf[i]=(1.0/fit_params.scale) * ( np.exp(-1*(((x_data[i]-fit_params.location)/(fit_params.scale)) + np.exp(-1.0*((x_data[i]-fit_params.location)/(fit_params.scale)) ))) )
-
+        # for i in range(pdf.size):
+        #     #model_y[i]=(1.0/fit_params.scale) * ((np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ))**(fit_params.shape_+1)) * np.exp( -1.0*np.exp( -1.0*( (data[i]-fit_params.location)/(fit_params.scale) ) ) )
+        #     pdf[i]=(1.0/fit_params.scale) * ( np.exp(-1*(((x_data[i]-fit_params.location)/(fit_params.scale)) + np.exp(-1.0*((x_data[i]-fit_params.location)/(fit_params.scale)) ))) )
+        pdf=gumbel_r.pdf(x_data, fit_params.location, fit_params.scale)
+        
     return pdf
 
 def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
