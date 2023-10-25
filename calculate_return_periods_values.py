@@ -48,7 +48,7 @@ def calculate_return_period(copula, sample, block_size=pd.to_timedelta("365.2425
     return return_period
 
 def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_name,x_gevd_fit_params, y_gevd_fit_params,
-                                       n_samples=1000,block_size=pd.to_timedelta("365.2425D"),
+                                       x_label, y_label, n_samples=1000,block_size=pd.to_timedelta("365.2425D"),
                                        contour_levels=[1/12,0.5,1.0,10.0]):
     
     # Create a sample
@@ -95,6 +95,7 @@ def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_n
     fig.colorbar(pcm, ax=ax, extend='max', label='Return Period (years)')
     
     # Some Decor
-    ax.set_xlabel(x_name)
-    ax.set_ylabel(y_name)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
      
+    return fig, ax

@@ -348,3 +348,4 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
     
     plt.show()
     
+    return fig, ax

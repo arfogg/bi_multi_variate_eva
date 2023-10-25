@@ -106,6 +106,10 @@ def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes, x_sample,
     t_data.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     ax[1].set_title('Copula Sample (data scale)', fontsize=csize)
     
+    # Make axes limits sample as for panel0
+    ax[1].set_xlim(ax[0].get_xlim())
+    ax[1].set_ylim(ax[0].get_ylim())
+    
     # Colourbar
     cbar_sample=fig.colorbar(h_sample[3], ax=ax[1])
     cbar_sample.set_label('Occurrence', fontsize=csize)
@@ -114,5 +118,5 @@ def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes, x_sample,
     # OBSERVED - COPULA
     
     
-    
+    return fig, ax
     
