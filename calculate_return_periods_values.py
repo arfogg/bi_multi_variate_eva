@@ -11,6 +11,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
+from matplotlib.transforms import TransformedBbox
+from matplotlib.transforms import Bbox
+
 import transform_uniform_margins
 
 def calculate_return_period(copula, sample, block_size=pd.to_timedelta("365.2425D")):
@@ -49,7 +52,7 @@ def calculate_return_period(copula, sample, block_size=pd.to_timedelta("365.2425
 
 def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_name,x_gevd_fit_params, y_gevd_fit_params,
                                        x_label, y_label, n_samples=1000,block_size=pd.to_timedelta("365.2425D"),
-                                       contour_levels=[1/12,0.5,1.0,10.0]):
+                                       contour_levels=[1/12,0.5,1.0,10.0], lower_ax_limit_contour_index=1):
     
     # Create a sample
     sample_um=pd.DataFrame({x_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_x,max_x,n_samples)),
@@ -84,15 +87,28 @@ def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_n
     fig,ax=plt.subplots()
     
     # Plot return period as function of x and y in data scale
-    pcm=ax.pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma', norm=colors.LogNorm(vmin=shaped_return_period.min(),
-                  vmax=shaped_return_period.max()*0.60))
-    
+    #pcm=ax.pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma', norm=colors.LogNorm(vmin=shaped_return_period.min(),
+    #              vmax=shaped_return_period.max()*0.10))
+    pcm=ax.pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma', norm=colors.LogNorm(vmin=np.quantile(shaped_return_period, 0.1),
+                  vmax=np.quantile(shaped_return_period, 0.999)))
+
     # Contours
     contours=ax.contour(mid_point_x_ds,mid_point_y_ds,shaped_return_period, contour_levels, colors='white')
-    ax.clabel(contours, inline=True)
+    for c in contours.collections:
+        c.set_clip_on(True)
+    clabels=ax.clabel(contours, inline=True, fmt="%0.1f")
+
+    # Work out x and y limits based on parsed contour index
+    lower_ax_limit_contour_index=1
+    xy_contour_limit=contours.allsegs[lower_ax_limit_contour_index][0]
+    xlim=np.min(xy_contour_limit[:,0])*0.9
+    ylim=np.min(xy_contour_limit[:,1])*0.9
+    ax.set_xlim(left=xlim)
+    ax.set_ylim(bottom=ylim)
     
     # Colourbar
-    fig.colorbar(pcm, ax=ax, extend='max', label='Return Period (years)')
+    cbar=fig.colorbar(pcm, ax=ax, extend='max', label='Return Period (years)')
+    cbar.add_lines(contours)  
     
     # Some Decor
     ax.set_xlabel(x_label)
