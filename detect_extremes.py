@@ -57,7 +57,8 @@ def find_block_maxima(data,df_data_tag,df_time_tag='datetime',block_size=pd.to_t
     # Convert to a pandas series with datetime as the index
     series=pd.Series(data=data[df_data_tag].values,index=data[df_time_tag])
     
-    extremes=pyextremes.extremes.get_extremes(series, "BM", extremes_type=extremes_type, block_size=block_size)
+    # errors='ignore' means block with no data will be ignored
+    extremes=pyextremes.extremes.get_extremes(series, "BM", extremes_type=extremes_type, block_size=block_size, errors='ignore')
     
     extremes=extremes.to_frame().reset_index()
     
