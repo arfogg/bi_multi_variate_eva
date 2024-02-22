@@ -16,14 +16,11 @@ scipy, numpy, matplotlib, pandas, seaborn, pyextremes, copulas
 [Install copulas using pip or see documentation here](https://pypi.org/project/copulas/)
 
 
-## Running the code
-
-#### Installing the code
+## Installing the code
 
 First, the code must be downloaded using `git clone https://github.com/arfogg/bi_multi_variate_eva`
 
-Alt-Bivariate Analysis
-------
+## Bivariate Analysis
 
 #### (1) Getting your data ready
 
@@ -127,6 +124,7 @@ fig_return_period,ax_return_period=calculate_return_periods_values.plot_return_p
 
 
 **TO DO: include example plots?**
+**TO DO: ensure all functions have good docstrings**
 
 ## Acknowledgements
 
