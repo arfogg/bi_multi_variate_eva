@@ -94,7 +94,41 @@ def test_check_AD_AI():
     
     
 def plot_extremal_dependence_coefficient(x_data,y_data, x_name, y_name, x_units, y_units, csize=17):
-    
+    """
+    Function to create a diagnostic plot to determine whether a pair of 
+    variables are asymptotically dependent.
+
+    Parameters
+    ----------
+    x_data : np.array or pd.Series
+        Timeseries of x parameter.
+    y_data : np.array or pd.Series
+        Timeseries of y parameter.
+    x_name : string
+        String name for axes labelling for x.
+    y_name : string
+        String name for axes labelling for y.
+    x_units : string
+        String name for axes labelling for x units.
+    y_units : string
+        String name for axes labelling for y units.
+    csize : int, optional
+        Fontsize for text on output plot. The default is 17.
+
+    Returns
+    -------
+    fig : matplotlib figure
+        Figure containing ax_data, ax_data_unif, ax_edc.    
+    ax_data : matplotlib axes
+        Axes containing a 2D histogram comparing x and y in data scale.
+    ax_data_unif : matplotlib axes
+        Axes containing a 2D histogram comparing x and y on uniform margins.
+    ax_edc : matplotlib axes
+        Axes showing the extremal dependence coefficient as a function of quantile.
+    np.min(chi) : float
+        Minimum value of the extremal dependence coefficient.
+
+    """
     # # TEST DATA
     # # Making the same function as in Daire's code
     # mean = [0, 0]
