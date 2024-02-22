@@ -8,7 +8,11 @@ Code to run bivariate and multivariate extreme value analysis on generic data - 
 
 ## Required Packages
 
-scipy, numpy, matplotlib
+scipy, numpy, matplotlib, pandas, seaborn, pyextremes, copulas
+
+[Install pyextremes following instructions from its github here](https://github.com/georgebv/pyextremes)
+
+[Install copulas using pip or see documentation](https://pypi.org/project/copulas/)
 
 ## Running the code
 
