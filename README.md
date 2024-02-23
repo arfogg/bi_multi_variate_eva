@@ -35,8 +35,6 @@ For example:
 determine_AD_AI.plot_extremal_dependence_coefficient(x, y, "X", "Y", "(units)", "(units)")
 ```
 
-**_TO DO: add some detail or a reference here on asymptotic dependence_**
-
 #### (3) Extract extrema
 
 Extract extremes for both X and Y using `detect_extremes.find_block_maxima`. Analysis on points above threshold maxima yet to be implemented.
@@ -57,8 +55,6 @@ x_gevd_fit_params=fit_model_to_extremes.fit_gevd_or_gumbel(x_extremes_df, 'BM', 
 y_gevd_fit_params=fit_model_to_extremes.fit_gevd_or_gumbel(y_extremes_df, 'BM', 'high','extreme',df_time_tag='datetime',fitting_type='Emcee', block_size=block_size)
 ```
 
-**_TO DO: add in references about GEVD and Gumbel distributions_**
-
 #### (5) Transform extrema data to uniform margins
 
 Transform x and y extrema from data scale (as it looks on the instrument) to uniform margins empirically using `transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically` or using the cumulative distribution function with `transform_uniform_margins.transform_from_data_scale_to_uniform_margins_using_CDF`.
@@ -78,8 +74,6 @@ You can plot a diagnostic about the transformation of one of the variables using
 fig_um_x,ax_um_x=transform_uniform_margins.plot_diagnostic(x_extremes_df.extreme, x_extremes_unif_empirical, x_extremes_unif, x_gevd_fit_params, 'X')
 ```
 
-**_TO DO: add in references about uniform margins_**
-
 #### (6) Fit a copula to both sets of extrema
 
 Fit a copula to x and y extrema using `fit_copula_to_extremes.fit_copula_bivariate`.
@@ -88,8 +82,6 @@ For example:
 ```python
 copula=fit_copula_to_extremes.fit_copula_bivariate(x_extremes_unif, y_extremes_unif, 'X', 'Y')
 ```
-
-**_TO DO: add in references about copulas_**
  
 #### (7) Take a sample from the copula
 
@@ -125,12 +117,6 @@ For example:
 ```python
 fig_return_period,ax_return_period=calculate_return_periods_values.plot_return_period_as_function_x_y(copula,np.nanmin(x_extremes_df.extreme),np.nanmax(x_extremes_df.extreme),np.nanmin(y_extremes_df.extreme),np.nanmax(y_extremes_df.extreme),'X','Y', x_gevd_fit_params, y_gevd_fit_params, 'X (units)', 'Y (units)', n_samples=1000,block_size=block_size)
 ```
-
-
-
-**_TO DO: include example plots?_**
-
-**_TO DO: ensure all functions have good docstrings_**
 
 ## Acknowledgements
 
