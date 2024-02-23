@@ -54,7 +54,56 @@ def calculate_return_period(copula, sample, block_size=pd.to_timedelta("365.2425
 def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_name,x_gevd_fit_params, y_gevd_fit_params,
                                        x_label, y_label, n_samples=1000,block_size=pd.to_timedelta("365.2425D"),
                                        contour_levels=[1/12,0.5,1.0,10.0], lower_ax_limit_contour_index=1):
-    
+    """
+    Function to plot the predicted return period as a function of
+    the two input parameters.
+
+    Parameters
+    ----------
+    copula : copulas copula
+        Copula fitted to x and y extremes.
+    min_x : float
+        Minimum x value that the return period will be evalutated at.
+    max_x : float
+        Maximum x value that the return period will be evalutated at.
+    min_y : float
+        Minimum y value that the return period will be evalutated at.
+    max_y : float
+        Maximum y value that the return period will be evalutated at.
+    x_name : string
+        Name for x, used for pandas.DataFrame column names.
+    y_name : string
+        Name for y, used for pandas.DataFrame column names.
+    x_gevd_fit_params : pandas.DataFrame
+        Dataframe containing fit parameters for x, output from 
+        fit_model_to_extremes.fit_gevd_or_gumbel.
+    y_gevd_fit_params : pandas.DataFrame
+        Dataframe containing fit parameters for y, output from 
+        fit_model_to_extremes.fit_gevd_or_gumbel.
+    x_label : string
+        Name for x, used for labelling plots.
+    y_label : string
+        Name for y, used for labelling plots.
+    n_samples : int, optional
+        Number of points for x and y axes. So return period is evaluated 
+        across n_samples x n_samples size grid. The default is 1000.
+    block_size : pd.timedelta, optional
+        Block size used in the block maxima extreme selection. The 
+        default is pd.to_timedelta("365.2425D").
+    contour_levels : list, optional
+        Return period values at which contours will be drawn. The 
+        default is [1/12,0.5,1.0,10.0].
+    lower_ax_limit_contour_index : int, optional
+        Used to decide the lower axes limits for x and y. The default is 1.
+
+    Returns
+    -------
+    fig : matplotlib figure
+        Figure containing the return period plot.
+    ax : matplotlib axes
+        Axes within fig.
+
+    """
     # Create a sample
     sample_um=pd.DataFrame({x_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_x,max_x,n_samples)),
                          y_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_y,max_y,n_samples))})
@@ -120,7 +169,57 @@ def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_n
 def plot_return_period_as_function_x_y_3d(copula,min_x,max_x,min_y,max_y,x_name,y_name,x_gevd_fit_params, y_gevd_fit_params,
                                        x_label, y_label, n_samples=1000,block_size=pd.to_timedelta("365.2425D"),
                                        contour_levels=[1/12,0.5,1.0,10.0], lower_ax_limit_contour_index=1):
-    
+    """
+    Function to plot a 3D visualisation of the return period plot.
+    WARNING: this is a work-in-progress!
+
+    Parameters
+    ----------       
+    copula : copulas copula
+        Copula fitted to x and y extremes.
+    min_x : float
+        Minimum x value that the return period will be evalutated at.
+    max_x : float
+        Maximum x value that the return period will be evalutated at.
+    min_y : float
+        Minimum y value that the return period will be evalutated at.
+    max_y : float
+        Maximum y value that the return period will be evalutated at.
+    x_name : string
+        Name for x, used for pandas.DataFrame column names.
+    y_name : string
+        Name for y, used for pandas.DataFrame column names.
+    x_gevd_fit_params : pandas.DataFrame
+        Dataframe containing fit parameters for x, output from 
+        fit_model_to_extremes.fit_gevd_or_gumbel.
+    y_gevd_fit_params : pandas.DataFrame
+        Dataframe containing fit parameters for y, output from 
+        fit_model_to_extremes.fit_gevd_or_gumbel.
+    x_label : string
+        Name for x, used for labelling plots.
+    y_label : string
+        Name for y, used for labelling plots.
+    n_samples : int, optional
+        Number of points for x and y axes. So return period is evaluated 
+        across n_samples x n_samples size grid. The default is 1000.
+    block_size : pd.timedelta, optional
+        Block size used in the block maxima extreme selection. The 
+        default is pd.to_timedelta("365.2425D").
+    contour_levels : list, optional
+        Return period values at which contours will be drawn. The 
+        default is [1/12,0.5,1.0,10.0].
+    lower_ax_limit_contour_index : int, optional
+        Used to decide the lower axes limits for x and y. The default is 1.
+
+    Returns
+    -------
+    fig : matplotlib figure
+        Figure containing 3D return period plot.
+    ax : matplotlib axes
+        Axes within fig.
+
+    """
+    print('WARNING: plot_return_period_as_function_x_y_3d is a work-in-progress!')
     # Create a sample
     sample_um=pd.DataFrame({x_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_x,max_x,n_samples)),
                          y_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_y,max_y,n_samples))})
@@ -176,9 +275,7 @@ def plot_return_period_as_function_x_y_3d(copula,min_x,max_x,min_y,max_y,x_name,
     
     # CUT OUT THE CORNER OF HIGH VALUES AND HAVE A LOOK AT THE
     #   VARIABILITY ELSEWHERE
-    # POTENTIALLY VISUALISE LIKE THE WINE ATTRIBUTE HEATMAP HERE:
-    # https://towardsdatascience.com/the-art-of-effective-visualization-of-multi-dimensional-data-6c7202990c57
-    
+   
     
     # # Plot return period as function of x and y in data scale
     # #pcm=ax.pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma', norm=colors.LogNorm(vmin=shaped_return_period.min(),
@@ -214,6 +311,56 @@ def plot_return_period_as_function_x_y_3d(copula,min_x,max_x,min_y,max_y,x_name,
 def plot_return_period_as_function_x_y_experimenting(copula,min_x,max_x,min_y,max_y,x_name,y_name,x_gevd_fit_params, y_gevd_fit_params,
                                        x_label, y_label, n_samples=1000,block_size=pd.to_timedelta("365.2425D"),
                                        contour_levels=[1/12,0.5,1.0,10.0], lower_ax_limit_contour_index=1):
+    """
+    Function with various experimental ways for showing the return
+    period plot.
+    WARNING: this is a work-in-progress!
+
+    Parameters
+    ----------    
+    copula : copulas copula
+        Copula fitted to x and y extremes.
+    min_x : float
+        Minimum x value that the return period will be evalutated at.
+    max_x : float
+        Maximum x value that the return period will be evalutated at.
+    min_y : float
+        Minimum y value that the return period will be evalutated at.
+    max_y : float
+        Maximum y value that the return period will be evalutated at.
+    x_name : string
+        Name for x, used for pandas.DataFrame column names.
+    y_name : string
+        Name for y, used for pandas.DataFrame column names.
+    x_gevd_fit_params : pandas.DataFrame
+        Dataframe containing fit parameters for x, output from 
+        fit_model_to_extremes.fit_gevd_or_gumbel.
+    y_gevd_fit_params : pandas.DataFrame
+        Dataframe containing fit parameters for y, output from 
+        fit_model_to_extremes.fit_gevd_or_gumbel.
+    x_label : string
+        Name for x, used for labelling plots.
+    y_label : string
+        Name for y, used for labelling plots.
+    n_samples : int, optional
+        Number of points for x and y axes. So return period is evaluated 
+        across n_samples x n_samples size grid. The default is 1000.
+    block_size : pd.timedelta, optional
+        Block size used in the block maxima extreme selection. The 
+        default is pd.to_timedelta("365.2425D").
+    contour_levels : list, optional
+        Return period values at which contours will be drawn. The 
+        default is [1/12,0.5,1.0,10.0].
+    lower_ax_limit_contour_index : int, optional
+        Used to decide the lower axes limits for x and y. The default is 1.
+
+
+    Returns
+    -------
+    None.
+
+    """
+    print('WARNING: plot_return_period_as_function_x_y_experimenting is a work-in-progress!')
     
     # Set fontsize
     csize=15
