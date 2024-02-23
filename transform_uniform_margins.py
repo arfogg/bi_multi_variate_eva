@@ -162,13 +162,11 @@ def transform_from_uniform_margins_to_data_scale(data_unif,fit_params, plot=Fals
         print('Transforming data from uniform margins to data scale for GEVD distribution')    
         
         for i in range(data.size):
-            #data[i]=( (fit_params.scale) / ( fit_params.shape_ * (-np.log(1-data_unif[i])) ** fit_params.shape_ ) )-(fit_params.scale/fit_params.shape_)+(fit_params.location)
             data[i]=( (fit_params.scale) / ( fit_params.shape_ * (-np.log(data_unif[i])) ** fit_params.shape_ ) )-(fit_params.scale/fit_params.shape_)+(fit_params.location)
     elif fit_params.distribution_name[0]=="gumbel_r":
         # For the Gumbel distribution
         print('Transforming data from uniform margins to data scale for Gumbel distribution')
         for i in range(data.size):
-            #!!! need to get this eqn/derivation checked !!!
             data[i]=fit_params.location - (fit_params.scale * np.log(-1.0*np.log(data_unif[i])))
         
     
@@ -208,7 +206,6 @@ def estimate_pdf(x_data,fit_params):
     """
 
     # Calculate the PDF at values of x
-    # PDF of distributions from wikipedia
     if fit_params.distribution_name[0]=='genextreme':
         print('Estimating PDF for GEVD distribution')
         pdf=genextreme.pdf(x_data, fit_params.shape_, loc=fit_params.location, scale=fit_params.scale)
@@ -285,6 +282,39 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
     return fig, ax
     
 def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale, y_sample_data_scale, x_fit_params, y_fit_params, x_name, y_name):
+    """
+    Function to plot diagnostic to assess copula fit.
+
+    Parameters
+    ----------
+    copula_x_sample : np.array or pd.Series
+        Random sample of x from copula on uniform margins.
+    copula_y_sample : np.array or pd.Series
+        Random sample of y from copula on uniform margins.
+    x_sample_data_scale : np.array or pd.Series
+        Random sample of x transformed to data scale.
+    y_sample_data_scale : np.array or pd.Series
+        Random sample of y transformed to data scale.
+    x_fit_params : pandas.DataFrame
+        pandas.DataFrame of the format output by 
+        fit_model_to_extremes.fit_gevd_or_gumbel for x.
+    y_fit_params : pandas.DataFrame
+        pandas.DataFrame of the format output by 
+        fit_model_to_extremes.fit_gevd_or_gumbel for y.
+    x_name : string
+        String name for x. Used for labelling plots.
+    y_name : string
+        String name for y. Used for labelling plots.
+
+    Returns
+    -------
+    fig : matplotlib figure
+        Figure containing copula diagnostic plot.
+    ax : array of matplotlib axes
+        Four axes within fig.
+
+    """
+    
     
     fig, ax=plt.subplots(nrows=2,ncols=2, figsize=(7,7))
     
