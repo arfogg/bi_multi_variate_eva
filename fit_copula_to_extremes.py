@@ -64,7 +64,32 @@ def fit_copula_bivariate(x_extremes, y_extremes, x_name, y_name):
 
 def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes, x_sample,
                                     y_sample, x_name, y_name):
-    
+    """
+    Function to do a qualitative diagnostic plot for copula fit.
+
+    Parameters
+    ----------
+    x_extremes : np.array or pd.Series
+        Observed x extremes (magnitude).
+    y_extremes : np.array or pd.Series
+        Observed y extremes (magnitude).
+    x_sample : np.array or pd.Series
+        Random copula sample (x) in data scale.
+    y_sample : np.array or pd.Series
+        Random copula sample (y) in data scale.
+    x_name : string
+        Name for x.
+    y_name : string
+        Name for y.
+
+    Returns
+    -------
+    fig : matplotlib figure
+        Diagnostic figure.
+    ax : array of matplotlib axes
+        Axes from fig.
+
+    """
     
    
     csize=15
@@ -88,12 +113,7 @@ def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes, x_sample,
     cbar_data.set_label('Occurrence', fontsize=csize)
     cbar_data.ax.tick_params(labelsize=csize)
 
-    
-    #return x_sample,y_sample
-    
-
     # COPULA SAMPLE
-
     h_sample=ax[1].hist2d(x_sample, y_sample, bins=[10,10], cmap='magma', cmin=1)
     
     # Some decor
