@@ -28,9 +28,14 @@ Make sure there are no datagaps in your timeseries. You can either remove the ro
 
 #### (2) Checking for Asymptotic Dependence
 
-The function `plot_extremal_dependence_coefficient` within `determine_AD_AI` creates a diagnostic plot to examine asymptotic dependence/independence:
+The function `plot_extremal_dependence_coefficient` within `determine_AD_AI` creates a diagnostic plot to examine asymptotic dependence/independence.
 
-**TO DO: add some detail or a reference here on asymptotic dependence**
+For example:
+```python
+determine_AD_AI.plot_extremal_dependence_coefficient(x, y, "X", "Y", "(units)", "(units)")
+```
+
+**_TO DO: add some detail or a reference here on asymptotic dependence_**
 
 #### (3) Extract extrema
 
@@ -52,7 +57,7 @@ x_gevd_fit_params=fit_model_to_extremes.fit_gevd_or_gumbel(x_extremes_df, 'BM', 
 y_gevd_fit_params=fit_model_to_extremes.fit_gevd_or_gumbel(y_extremes_df, 'BM', 'high','extreme',df_time_tag='datetime',fitting_type='Emcee', block_size=block_size)
 ```
 
-**TO DO: add in references about GEVD and Gumbel distributions**
+**_TO DO: add in references about GEVD and Gumbel distributions_**
 
 #### (5) Transform extrema data to uniform margins
 
@@ -73,7 +78,7 @@ You can plot a diagnostic about the transformation of one of the variables using
 fig_um_x,ax_um_x=transform_uniform_margins.plot_diagnostic(x_extremes_df.extreme, x_extremes_unif_empirical, x_extremes_unif, x_gevd_fit_params, 'X')
 ```
 
-**TO DO: add in references about uniform margins**
+**_TO DO: add in references about uniform margins_**
 
 #### (6) Fit a copula to both sets of extrema
 
@@ -84,7 +89,7 @@ For example:
 copula=fit_copula_to_extremes.fit_copula_bivariate(x_extremes_unif, y_extremes_unif, 'X', 'Y')
 ```
 
-**TO DO: add in references about copulas**
+**_TO DO: add in references about copulas_**
  
 #### (7) Take a sample from the copula
 
@@ -123,8 +128,9 @@ fig_return_period,ax_return_period=calculate_return_periods_values.plot_return_p
 
 
 
-**TO DO: include example plots?**
-**TO DO: ensure all functions have good docstrings**
+**_TO DO: include example plots?_**
+
+**_TO DO: ensure all functions have good docstrings_**
 
 ## Acknowledgements
 
