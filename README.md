@@ -111,7 +111,7 @@ fig_copula_2d,ax_copula_2d=fit_copula_to_extremes.qualitative_copula_fit_check_b
 
 #### (9) Plot return period as a function of two variables
 
-To plot the return period as a function of x and y, with contours at 0.5, 1 an
+To plot the return period as a function of x and y, with standard contours.
 
 For example:
 ```python
