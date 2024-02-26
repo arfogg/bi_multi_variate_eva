@@ -129,11 +129,12 @@ def plot_extremal_dependence_coefficient(x_data,y_data, x_name, y_name, x_units,
     for label in (ax_edc.get_xticklabels() + ax_edc.get_yticklabels()):
         label.set_fontsize(csize)
     
-    t=ax_edc.text(0.95, 0.95, '$\chi _{min}$ = '+str(round(np.min(chi),3)), transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='right')
+    #t=ax_edc.text(0.95, 0.95, '$\chi _{min}$ = '+str(round(np.min(chi),3)), transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='right')
+    t=ax_edc.text(0.95, 0.95, '$\chi _{q=1}$ = '+str(round(chi[-1],3)), transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='right')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
 
     
     fig.tight_layout()
     
-    return fig, ax_data, ax_data_unif, ax_edc, np.min(chi)
+    return fig, ax_data, ax_data_unif, ax_edc, chi[-1]
         
