@@ -6,6 +6,21 @@ Code to run bivariate and multivariate extreme value analysis on generic data - 
 
 **Support:** please [create an issue](https://github.com/arfogg/bi_multi_variate_eva/issues) or contact [arfogg](https://github.com/arfogg) directly. Any input on the code / issues found are greatly appreciated and will help to improve the software.
 
+## Table of Contents
+- [Required Packages](#required-packages)
+- [Installing the code](#installing-the-code)
+- [Bivariate Analysis](#bivariate-analysis)     
+   * [(1) Getting your data ready](#(1)-getting-your-data-ready) 
+   * [(2) Checking for Asymptotic Dependence](#(2)-checking-for-asymptotic-dependence) 
+   * [(3) Extract extrema](#(3)-extract-extrema) 
+   * [(4) Fit a model to the extrema](#(4)-fit-a-model-to-the-extrema) 
+   * [(5) Transform extrema data to uniform margins](#(5)-transform-extrema-data-to-uniform-margins) 
+   * [(6) Fit a copula to both sets of extrema](#(6)-fit-a-copula-to-both-sets-of-extrema) 
+   * [(7) Take a sample from the copula](#(7)-take-a-sample-from-the-copula) 
+   * [(8) Plot diagnostic to assess copula fit](#(8)-plot-diagnostic-to-assess-copula-fit) 
+   * [(9) Plot return period as a function of two variables](#(9)-plot-return-period-as-a-function-of-two-variables) 
+- [Multivariate Analysis](#multivariate-analysis)
+- [Acknowledgements](#acknowledgements)
 
 ## Required Packages
 
