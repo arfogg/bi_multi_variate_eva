@@ -10,7 +10,7 @@ Code to run bivariate and multivariate extreme value analysis on generic data - 
 - [Required Packages](#required-packages)
 - [Installing the code](#installing-the-code)
 - [Bivariate Analysis](#bivariate-analysis)     
-   * [(1) Getting your data ready](#(1)-getting-your-data-ready) 
+   * [(1) Getting your data ready](#1-getting-your-data-ready) 
    * [(2) Checking for Asymptotic Dependence](#(2)-checking-for-asymptotic-dependence) 
    * [(3) Extract extrema](#(3)-extract-extrema) 
    * [(4) Fit a model to the extrema](#(4)-fit-a-model-to-the-extrema) 
