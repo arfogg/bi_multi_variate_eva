@@ -84,6 +84,10 @@ def plot_extremal_dependence_coefficient(x_data,y_data, x_name, y_name, x_units,
     cb_data.ax.tick_params(labelsize=csize)
     cb_data.set_label("Normalised occurrence", fontsize=csize)
     
+    t_data=ax_data.text(0.06, 0.94, '(a)', transform=ax_data.transAxes, fontsize=csize,  va='top', ha='left')
+    t_data.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+
+    
     # Transform the variables into "uniform" - ask Daire
     #x_unif=scipy.stats.rankdata(x_data)/(x_data.size+1)
     x_unif=transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(x_data,plot=False)
@@ -111,6 +115,9 @@ def plot_extremal_dependence_coefficient(x_data,y_data, x_name, y_name, x_units,
     cb_unif.ax.tick_params(labelsize=csize)
     cb_unif.set_label("Normalised occurrence", fontsize=csize)
     
+    t_unif=ax_data_unif.text(0.06, 0.94, '(b)', transform=ax_data_unif.transAxes, fontsize=csize,  va='top', ha='left')
+    t_unif.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    
     # Calculate the "extremal dependence coefficient", called chi
     #    for a range of quantiles u (from 0 to 1)
     # if chi -> 0 as u -> 1, then x and y are asymptotically independent
@@ -133,7 +140,9 @@ def plot_extremal_dependence_coefficient(x_data,y_data, x_name, y_name, x_units,
     t=ax_edc.text(0.95, 0.95, '$\chi _{q=1}$ = '+str(round(chi[-1],3)), transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='right')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
 
-    
+    t_edc=ax_edc.text(0.03, 0.94, '(c)', transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='left')
+    t_edc.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))    
+
     fig.tight_layout()
     
     return fig, ax_data, ax_data_unif, ax_edc, chi[-1]
