@@ -145,5 +145,5 @@ def plot_extremal_dependence_coefficient(x_data,y_data, x_name, y_name, x_units,
 
     fig.tight_layout()
     
-    return fig, ax_data, ax_data_unif, ax_edc, chi[-1]
+    return fig, ax_data, ax_data_unif, ax_edc, chi[-1], chi
         
