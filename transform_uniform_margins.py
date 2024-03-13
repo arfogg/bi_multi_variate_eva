@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 from scipy.stats import genextreme
 from scipy.stats import gumbel_r
 
+import qq_plot
+
 def transform_from_data_scale_to_uniform_margins_empirically(data, plot=False):
     """
     Transform the data to uniform margins empirically
@@ -215,7 +217,7 @@ def estimate_pdf(x_data,fit_params):
         
     return pdf
 
-def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
+def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, um_bins=np.linspace(0,1,11)):
     """
     Function to plot the PDF of extremes and the fitted distribution (left),
     and comparing the empirically and CDF determined data on uniform
@@ -236,6 +238,9 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
         shape_, scale, location
     data_tag : string
         name of data to be put in figure captions etc
+    um_bins : np.array
+        array defining the edges of the bins for the 
+        uniform margins histograms
 
     Returns
     -------
@@ -243,37 +248,74 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
 
     """
     # Initialise figure and axes
-    fig,ax=plt.subplots(ncols=2,figsize=(8,4))
+    fig,ax=plt.subplots(ncols=2, nrows=2, figsize=(8,8))
         
     # Plot normalised histogram of extremes
-    ax[0].hist(data, bins=25, density=True, rwidth=0.8, color='deepskyblue', label='extremes')
+    ax[0,0].hist(data, bins=np.linspace(np.nanmin(data),np.nanmax(data),25), density=True, rwidth=0.8, color='darkgrey', label='extremes')
         
     # Initialise arrays
     model_x=np.linspace(np.nanmin(data),np.nanmax(data), 100)
     model_y=estimate_pdf(model_x,fit_params)
     
     # Plot the PDF against x
-    ax[0].plot(model_x,model_y, color='darkmagenta', label=fit_params.distribution_name[0])
+    ax[0,0].plot(model_x,model_y, color='darkmagenta', label=fit_params.formatted_dist_name[0])
     
     # Some decor
-    ax[0].set_ylabel('Normalised Occurrence')
-    ax[0].set_xlabel('Data in data scale')    
-    ax[0].legend(loc='upper right')
-    t=ax[0].text(0.06, 0.94, '(a)', transform=ax[0].transAxes, va='top', ha='left')
+    ax[0,0].set_ylabel('Normalised Occurrence')
+    ax[0,0].set_xlabel('Data in data scale')    
+    t=ax[0,0].text(0.06, 0.94, '(a)', transform=ax[0,0].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[0].set_title(fit_params.distribution_name[0]+' fit assessment for '+data_tag)
+    ax[0,0].set_title(fit_params.formatted_dist_name[0]+' fit assessment for '+data_tag)
 
     # Plot normalised histograms of different uniform margins data
-    ax[1].hist(data_unif_cdf, bins=25, density=True, rwidth=0.8, color='darkorange', label='using CDF')
-    ax[1].hist(data_unif_empirical, bins=25, density=True, rwidth=0.8, color='grey', alpha=0.5, label='empirical')
+    ax[0,1].hist(data_unif_cdf, bins=um_bins, density=True, rwidth=0.8, color='darkorange', label='using CDF')
+    ax[0,1].hist(data_unif_empirical, bins=um_bins, density=True, rwidth=0.8, color='grey', alpha=0.5, label='empirical')
     
     # Some decor
-    ax[1].set_ylabel('Normalised Occurrence')
-    ax[1].set_xlabel('Data on uniform margins '+data_tag)
-    ax[1].legend(loc='upper right')
-    t=ax[1].text(0.06, 0.94, '(b)', transform=ax[1].transAxes, va='top', ha='left')
+    ax[0,1].set_ylabel('Normalised Occurrence')
+    ax[0,1].set_xlabel('Data on uniform margins '+data_tag)
+    ax[0,1].legend(loc='upper right')
+    t=ax[0,1].text(0.06, 0.94, '(b)', transform=ax[0,1].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[1].set_title('Comparison of data on uniform margins')
+    ax[0,1].set_title('Comparison of data on uniform margins')
+    
+    # QQ plot comparing the extremes and their PDF
+    # Get a random sample from the distribution
+    if fit_params.distribution_name[0]=='genextreme':
+        model_random_sample=genextreme.rvs(fit_params.shape_, loc=fit_params.location, scale=fit_params.scale, size=100, random_state=2)
+    elif fit_params.distribution_name[0]=='gumbel_r':
+        model_random_sample=gumbel_r.rvs(loc=fit_params.location, scale=fit_params.scale, size=100, random_state=2)
+    
+    # Quick check to ensure random sample is all good
+    ax[0,0].hist(model_random_sample, bins=np.linspace(np.nanmin(data),np.nanmax(data),25), 
+                 density=True, rwidth=0.8, color='darkmagenta', 
+                 label=fit_params.formatted_dist_name[0]+' sample', alpha=0.3)
+    ax[0,0].legend(loc='upper right')
+    
+    ax[1,0]=qq_plot.qq_plot(data, model_random_sample, ax[1,0], quantiles=np.linspace(0,100,26), 
+                            legend_pos='center left', color='darkmagenta')
+    
+    # Some decor
+    ax[1,0].set_xlabel('Extremes')
+    ax[1,0].set_ylabel('Fitted '+fit_params.formatted_dist_name[0]+' distribution')
+    t=ax[1,0].text(0.06, 0.94, '(c)', transform=ax[1,0].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))    
+    
+    # QQ plot comparing the uniform margins distributions
+    ax[1,1]=qq_plot.qq_plot(data_unif_empirical, data_unif_cdf, ax[1,1], quantiles=np.linspace(0,100,26), 
+                            legend_pos='center left', color='darkorange')
+    
+    # Some decor
+    ax[1,1].set_xlabel('Empirical')
+    ax[1,1].set_ylabel('CDF')
+    t=ax[1,1].text(0.06, 0.94, '(d)', transform=ax[1,1].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    
+    
+    
+    
+    
+    
     
     fig.tight_layout()
 

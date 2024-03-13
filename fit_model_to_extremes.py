@@ -107,5 +107,10 @@ def fit_gevd_or_gumbel(extremes_df,extremes_method,extremes_type,
         fit_params['scale_upper_ci_width']=scale_quantiles[1]-fit_params.scale
     
     fit_params['distribution_name']= eva.distribution.name   
+    
+    if fit_params.distribution_name[0] == 'genextreme':
+        fit_params['formatted_dist_name']='GEVD'
+    elif fit_params.distribution_name[0] == 'gumbel_r':
+        fit_params['formatted_dist_name']='Gumbel'
 
     return fit_params
