@@ -323,7 +323,8 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
     
     return fig, ax
     
-def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale, y_sample_data_scale, x_fit_params, y_fit_params, x_name, y_name):
+def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale, y_sample_data_scale,
+                           x_fit_params, y_fit_params, x_name, y_name, um_bins=np.linspace(0,1,11)):
     """
     Function to plot diagnostic to assess copula fit.
 
@@ -347,6 +348,9 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
         String name for x. Used for labelling plots.
     y_name : string
         String name for y. Used for labelling plots.
+    um_bins : np.array
+        array defining the edges of the bins for the 
+        uniform margins histograms
 
     Returns
     -------
@@ -362,23 +366,23 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
     
     # FOR X PARAMETER
     # Plot normalised histogram of copula sample in data scale
-    ax[0,0].hist(x_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label='x copula sample\n(data scale)')
+    ax[0,0].hist(x_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label=x_name+' copula\nsample\n(data scale)')
     
     # Overplot distribution
     model_x=np.linspace(np.nanmin(x_sample_data_scale),np.nanmax(x_sample_data_scale), 100)
     model_y=estimate_pdf(model_x,x_fit_params)
-    ax[0,0].plot(model_x,model_y, color='darkmagenta', label=x_fit_params.distribution_name[0])
+    ax[0,0].plot(model_x,model_y, color='darkmagenta', label=x_fit_params.formatted_dist_name[0])
     
     # Some decor
     ax[0,0].set_xlabel('Data scale for '+x_name)
     ax[0,0].set_ylabel('Normalised Occurrence')
-    ax[0,0].set_title('Copula sample vs '+x_fit_params.distribution_name[0]+' (data scale)')
+    ax[0,0].set_title('Copula sample vs '+x_fit_params.formatted_dist_name[0]+' (data scale)')
     t=ax[0,0].text(0.06, 0.94, '(a)', transform=ax[0,0].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     ax[0,0].legend(loc='upper right')
     
     # Plot normalised histogram of copula sample on uniform margins
-    ax[0,1].hist(copula_x_sample, bins=25, density=True, rwidth=0.8, color='darkorange', label='copula sample')
+    ax[0,1].hist(copula_x_sample, bins=um_bins, density=True, rwidth=0.8, color='darkorange', label=x_name+' copula sample\n(uniform margins)')
 
     # Some decor
     ax[0,1].set_xlabel('Copula sample for '+x_name)
@@ -390,23 +394,23 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
 
     # FOR Y PARAMETER
     # Plot normalised histogram of copula sample in data scale
-    ax[1,0].hist(y_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label='y copula sample\n(data scale)')
+    ax[1,0].hist(y_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label=y_name+' copula\nsample\n(data scale)')
     
     # Overplot distribution
     model_x=np.linspace(np.nanmin(y_sample_data_scale),np.nanmax(y_sample_data_scale), 100)
     model_y=estimate_pdf(model_x,y_fit_params)
-    ax[1,0].plot(model_x,model_y, color='darkmagenta', label=y_fit_params.distribution_name[0])
+    ax[1,0].plot(model_x,model_y, color='darkmagenta', label=y_fit_params.formatted_dist_name[0])
     
     # Some decor
     ax[1,0].set_xlabel('Data scale for '+y_name)
     ax[1,0].set_ylabel('Normalised Occurrence')
-    ax[1,0].set_title('Copula sample vs '+y_fit_params.distribution_name[0]+' (data scale)')
+    ax[1,0].set_title('Copula sample vs '+y_fit_params.formatted_dist_name[0]+' (data scale)')
     t=ax[1,0].text(0.06, 0.94, '(c)', transform=ax[1,0].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     ax[1,0].legend(loc='upper right')    
     
     # Plot normalised histogram of copula sample on uniform margins
-    ax[1,1].hist(copula_y_sample, bins=25, density=True, rwidth=0.8, color='darkorange', label='copula sample')
+    ax[1,1].hist(copula_y_sample, bins=um_bins, density=True, rwidth=0.8, color='darkorange', label=y_name+' copula sample\n(uniform margins)')
 
     # Some decor
     ax[1,1].set_xlabel('Copula sample for '+y_name)
