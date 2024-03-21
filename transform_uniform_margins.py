@@ -14,6 +14,7 @@ from scipy.stats import genextreme
 from scipy.stats import gumbel_r
 
 import qq_plot
+import return_period_plot_1d
 
 def transform_from_data_scale_to_uniform_margins_empirically(data, plot=False):
     """
@@ -217,7 +218,7 @@ def estimate_pdf(x_data,fit_params):
         
     return pdf
 
-def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, um_bins=np.linspace(0,1,11)):
+def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, block_size, um_bins=np.linspace(0,1,11)):
     """
     Function to plot the PDF of extremes and the fitted distribution (left),
     and comparing the empirically and CDF determined data on uniform
@@ -238,6 +239,8 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
         shape_, scale, location
     data_tag : string
         name of data to be put in figure captions etc
+    block_size : pd.Timedelta
+        Size over which block maxima have been found, e.g. pd.to_timedelta("365.2425D").
     um_bins : np.array
         array defining the edges of the bins for the 
         uniform margins histograms
@@ -248,7 +251,7 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
 
     """
     # Initialise figure and axes
-    fig,ax=plt.subplots(ncols=2, nrows=2, figsize=(8,8))
+    fig,ax=plt.subplots(ncols=3, nrows=2, figsize=(13,8))
         
     # Plot normalised histogram of extremes
     ax[0,0].hist(data, bins=np.linspace(np.nanmin(data),np.nanmax(data),25), density=True, rwidth=0.8, color='darkgrey', label='extremes')
@@ -279,6 +282,9 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     ax[0,1].set_title('Comparison of data on uniform margins')
     
+    print('-----------------------ALERT:')
+    print('QQ needs doing properly - see notes from meeting with Dáire')
+    print('--------------------------')
     # QQ plot comparing the extremes and their PDF
     # Get a random sample from the distribution
     if fit_params.distribution_name[0]=='genextreme':
@@ -294,6 +300,8 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
     
     ax[1,0]=qq_plot.qq_plot(data, model_random_sample, ax[1,0], quantiles=np.linspace(0,100,26), 
                             legend_pos='center left', color='darkmagenta')
+    ax[1,0].text(0.5,0.5,'needs edits!!', transform=ax[1,0].transAxes, va='center', ha='center', fontsize=20)
+    
     
     # Some decor
     ax[1,0].set_xlabel('Extremes')
@@ -313,6 +321,14 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
     
     
     
+    # Return period plot
+    ax[0,2]=return_period_plot_1d.return_period_plot(data, fit_params, block_size, data_tag, ax[0,2], csize=15)
+    
+    ax[0,2].text(0.5,0.5,'return period plot', transform=ax[0,2].transAxes, va='center', ha='center', fontsize=20)
+    
+    
+    # Return values table
+    ax[1,2].text(0.5,0.5,'return values table', transform=ax[1,2].transAxes, va='center', ha='center', fontsize=20)
     
     
     
