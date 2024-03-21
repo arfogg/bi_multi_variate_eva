@@ -362,63 +362,71 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
     """
     
     
-    fig, ax=plt.subplots(nrows=2,ncols=2, figsize=(7,7))
+    fig, ax=plt.subplots(nrows=2,ncols=3, figsize=(11,7))
     
     # FOR X PARAMETER
+    
+    # Plot normalised histogram of copula sample on uniform margins
+    ax[0,0].hist(copula_x_sample, bins=um_bins, density=True, rwidth=0.8, color='darkorange', label=x_name+' copula sample\n(uniform margins)')
+
+    # Some decor
+    ax[0,0].set_xlabel('Copula sample for '+x_name)
+    ax[0,0].set_ylabel('Normalised Occurrence')
+    ax[0,0].set_title('Copula sample on uniform margins')
+    t=ax[0,0].text(0.06, 0.94, '(b)', transform=ax[0,0].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    ax[0,0].legend(loc='upper right') 
+    
     # Plot normalised histogram of copula sample in data scale
-    ax[0,0].hist(x_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label=x_name+' copula\nsample\n(data scale)')
+    ax[0,1].hist(x_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label=x_name+' copula\nsample\n(data scale)')
     
     # Overplot distribution
     model_x=np.linspace(np.nanmin(x_sample_data_scale),np.nanmax(x_sample_data_scale), 100)
     model_y=estimate_pdf(model_x,x_fit_params)
-    ax[0,0].plot(model_x,model_y, color='darkmagenta', label=x_fit_params.formatted_dist_name[0])
+    ax[0,1].plot(model_x,model_y, color='darkmagenta', label=x_fit_params.formatted_dist_name[0])
     
     # Some decor
-    ax[0,0].set_xlabel('Data scale for '+x_name)
-    ax[0,0].set_ylabel('Normalised Occurrence')
-    ax[0,0].set_title('Copula sample vs '+x_fit_params.formatted_dist_name[0]+' (data scale)')
-    t=ax[0,0].text(0.06, 0.94, '(a)', transform=ax[0,0].transAxes, va='top', ha='left')
-    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[0,0].legend(loc='upper right')
-    
-    # Plot normalised histogram of copula sample on uniform margins
-    ax[0,1].hist(copula_x_sample, bins=um_bins, density=True, rwidth=0.8, color='darkorange', label=x_name+' copula sample\n(uniform margins)')
-
-    # Some decor
-    ax[0,1].set_xlabel('Copula sample for '+x_name)
+    ax[0,1].set_xlabel('Data scale for '+x_name)
     ax[0,1].set_ylabel('Normalised Occurrence')
-    ax[0,1].set_title('Copula sample on uniform margins')
-    t=ax[0,1].text(0.06, 0.94, '(b)', transform=ax[0,1].transAxes, va='top', ha='left')
+    ax[0,1].set_title('Copula sample vs '+x_fit_params.formatted_dist_name[0]+' (data scale)')
+    t=ax[0,1].text(0.06, 0.94, '(a)', transform=ax[0,1].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[0,1].legend(loc='upper right')    
+    ax[0,1].legend(loc='upper right')
+    
+    # QQ plot comparing Copula sample in data scale with GEVD fit
+    ax[0,2].text(0.5,0.5,'QQ TBC', transform=ax[0,2].transAxes, va='center', ha='center')
 
     # FOR Y PARAMETER
+    # Plot normalised histogram of copula sample on uniform margins
+    ax[1,0].hist(copula_y_sample, bins=um_bins, density=True, rwidth=0.8, color='darkorange', label=y_name+' copula sample\n(uniform margins)')
+
+    # Some decor
+    ax[1,0].set_xlabel('Copula sample for '+y_name)
+    ax[1,0].set_ylabel('Normalised Occurrence')
+    ax[1,0].set_title('Copula sample on uniform margins')
+    t=ax[1,0].text(0.06, 0.94, '(d)', transform=ax[1,0].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    ax[1,0].legend(loc='upper right')
+
     # Plot normalised histogram of copula sample in data scale
-    ax[1,0].hist(y_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label=y_name+' copula\nsample\n(data scale)')
+    ax[1,1].hist(y_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label=y_name+' copula\nsample\n(data scale)')
     
     # Overplot distribution
     model_x=np.linspace(np.nanmin(y_sample_data_scale),np.nanmax(y_sample_data_scale), 100)
     model_y=estimate_pdf(model_x,y_fit_params)
-    ax[1,0].plot(model_x,model_y, color='darkmagenta', label=y_fit_params.formatted_dist_name[0])
+    ax[1,1].plot(model_x,model_y, color='darkmagenta', label=y_fit_params.formatted_dist_name[0])
     
     # Some decor
-    ax[1,0].set_xlabel('Data scale for '+y_name)
-    ax[1,0].set_ylabel('Normalised Occurrence')
-    ax[1,0].set_title('Copula sample vs '+y_fit_params.formatted_dist_name[0]+' (data scale)')
-    t=ax[1,0].text(0.06, 0.94, '(c)', transform=ax[1,0].transAxes, va='top', ha='left')
-    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[1,0].legend(loc='upper right')    
-    
-    # Plot normalised histogram of copula sample on uniform margins
-    ax[1,1].hist(copula_y_sample, bins=um_bins, density=True, rwidth=0.8, color='darkorange', label=y_name+' copula sample\n(uniform margins)')
-
-    # Some decor
-    ax[1,1].set_xlabel('Copula sample for '+y_name)
+    ax[1,1].set_xlabel('Data scale for '+y_name)
     ax[1,1].set_ylabel('Normalised Occurrence')
-    ax[1,1].set_title('Copula sample on uniform margins')
-    t=ax[1,1].text(0.06, 0.94, '(d)', transform=ax[1,1].transAxes, va='top', ha='left')
+    ax[1,1].set_title('Copula sample vs '+y_fit_params.formatted_dist_name[0]+' (data scale)')
+    t=ax[1,1].text(0.06, 0.94, '(c)', transform=ax[1,1].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[1,1].legend(loc='upper right')
+    ax[1,1].legend(loc='upper right')    
+    
+    # QQ plot comparing Copula sample in data scale with GEVD fit
+    ax[1,2].text(0.5,0.5,'QQ TBC', transform=ax[1,2].transAxes, va='center', ha='center')
+
     
     fig.tight_layout()
     
