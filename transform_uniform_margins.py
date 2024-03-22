@@ -218,7 +218,7 @@ def estimate_pdf(x_data,fit_params):
         
     return pdf
 
-def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, block_size, um_bins=np.linspace(0,1,11)):
+def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, data_units_fm, block_size, um_bins=np.linspace(0,1,11)):
     """
     Function to plot the PDF of extremes and the fitted distribution (left),
     and comparing the empirically and CDF determined data on uniform
@@ -239,6 +239,8 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
         shape_, scale, location
     data_tag : string
         name of data to be put in figure captions etc
+    data_units_fm : string
+        units for data to be put in axes labels etc
     block_size : pd.Timedelta
         Size over which block maxima have been found, e.g. pd.to_timedelta("365.2425D").
     um_bins : np.array
@@ -265,7 +267,7 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
     
     # Some decor
     ax[0,0].set_ylabel('Normalised Occurrence')
-    ax[0,0].set_xlabel('Data in data scale')    
+    ax[0,0].set_xlabel(data_tag + ' in data scale ('+data_units_fm+')')    
     t=ax[0,0].text(0.06, 0.94, '(a)', transform=ax[0,0].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     ax[0,0].set_title(fit_params.formatted_dist_name[0]+' fit assessment for '+data_tag)
@@ -276,7 +278,7 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
     
     # Some decor
     ax[0,1].set_ylabel('Normalised Occurrence')
-    ax[0,1].set_xlabel('Data on uniform margins '+data_tag)
+    ax[0,1].set_xlabel(data_tag + ' on uniform margins')
     ax[0,1].legend(loc='upper right')
     t=ax[0,1].text(0.06, 0.94, '(b)', transform=ax[0,1].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
@@ -306,7 +308,7 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
     # Some decor
     ax[1,0].set_xlabel('Extremes')
     ax[1,0].set_ylabel('Fitted '+fit_params.formatted_dist_name[0]+' distribution')
-    t=ax[1,0].text(0.06, 0.94, '(c)', transform=ax[1,0].transAxes, va='top', ha='left')
+    t=ax[1,0].text(0.06, 0.94, '(d)', transform=ax[1,0].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))    
     
     # QQ plot comparing the uniform margins distributions
@@ -316,21 +318,28 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
     # Some decor
     ax[1,1].set_xlabel('Empirical')
     ax[1,1].set_ylabel('CDF')
-    t=ax[1,1].text(0.06, 0.94, '(d)', transform=ax[1,1].transAxes, va='top', ha='left')
+    t=ax[1,1].text(0.06, 0.94, '(e)', transform=ax[1,1].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     
     
     
     # Return period plot
-    ax[0,2]=return_period_plot_1d.return_period_plot(data, fit_params, block_size, data_tag, ax[0,2], csize=15)
+    ax[0,2]=return_period_plot_1d.return_period_plot(data, fit_params, block_size, data_tag, data_units_fm, ax[0,2], csize=15)
+
+    # TEMPORARY LABEL - REMOVE WHEN COMPLETE
+    ax[0,2].text(0.5,0.5,'needs CI shade', transform=ax[0,2].transAxes, va='center', ha='center', fontsize=20)
     
-    ax[0,2].text(0.5,0.5,'return period plot', transform=ax[0,2].transAxes, va='center', ha='center', fontsize=20)
-    
+    # Some decor
+    t=ax[0,2].text(0.06, 0.94, '(c)', transform=ax[0,2].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+
     
     # Return values table
     ax[1,2].text(0.5,0.5,'return values table', transform=ax[1,2].transAxes, va='center', ha='center', fontsize=20)
     
-    
+    # Some decor
+    t=ax[1,2].text(0.06, 0.94, '(f)', transform=ax[1,2].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))    
     
     
     fig.tight_layout()
