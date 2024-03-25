@@ -12,6 +12,9 @@ def produce_bootstrap_sample(data, extract_length):
     Function to product a bootstrapping sample from a given 
     data set.
 
+    Based on code by Dr Dáire Healy here - 
+    https://github.com/arfogg/bi_multi_variate_eva/blob/c8f7911b5aa911a074a33b862224563460357ce3/r_code/bootstrapped_chi.R
+
     Parameters
     ----------
     data : np.array
