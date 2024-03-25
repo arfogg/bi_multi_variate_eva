@@ -335,11 +335,13 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
 
     
     # Return values table
-    ax[1,2].text(0.5,0.5,'return values table', transform=ax[1,2].transAxes, va='center', ha='center', fontsize=20)
+    ax[1,2].text(0.5,0.5,'needs CI', transform=ax[1,2].transAxes, va='center', ha='center', fontsize=20)
+    ax[1,2]=return_period_plot_1d.return_period_table_ax(ax[1,2], fit_params, block_size, data_units_fm)
     
     # Some decor
-    t=ax[1,2].text(0.06, 0.94, '(f)', transform=ax[1,2].transAxes, va='top', ha='left')
+    t=ax[1,2].text(0.03, 0.90, '(f)', transform=ax[1,2].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))    
+    
     
     
     fig.tight_layout()
