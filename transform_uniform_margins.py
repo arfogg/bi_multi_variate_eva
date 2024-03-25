@@ -283,27 +283,12 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
     t=ax[0,1].text(0.06, 0.94, '(b)', transform=ax[0,1].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     ax[0,1].set_title('Comparison of data on uniform margins')
-    
-    print('-----------------------ALERT:')
-    print('QQ needs doing properly - see notes from meeting with Dáire')
-    print('--------------------------')
-    # QQ plot comparing the extremes and their PDF
-    # Get a random sample from the distribution
-    if fit_params.distribution_name[0]=='genextreme':
-        model_random_sample=genextreme.rvs(fit_params.shape_, loc=fit_params.location, scale=fit_params.scale, size=100, random_state=2)
-    elif fit_params.distribution_name[0]=='gumbel_r':
-        model_random_sample=gumbel_r.rvs(loc=fit_params.location, scale=fit_params.scale, size=100, random_state=2)
-    
-    # Quick check to ensure random sample is all good
-    ax[0,0].hist(model_random_sample, bins=np.linspace(np.nanmin(data),np.nanmax(data),25), 
-                 density=True, rwidth=0.8, color='darkmagenta', 
-                 label=fit_params.formatted_dist_name[0]+' sample', alpha=0.3)
     ax[0,0].legend(loc='upper right')
     
-    ax[1,0]=qq_plot.qq_plot(data, model_random_sample, ax[1,0], quantiles=np.linspace(0,100,26), 
-                            legend_pos='center left', color='darkmagenta')
-    ax[1,0].text(0.5,0.5,'needs edits!!', transform=ax[1,0].transAxes, va='center', ha='center', fontsize=20)
-    
+    # QQ plot comparing the extremes and their PDF
+    ax[1,0]=qq_plot.qq_data_vs_model(ax[1,0], data, data_unif_empirical, fit_params, 
+                         marker='^', fillstyle='none', color='darkmagenta', title='', 
+                         legend_pos='center left')
     
     # Some decor
     ax[1,0].set_xlabel('Extremes')
@@ -312,7 +297,7 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))    
     
     # QQ plot comparing the uniform margins distributions
-    ax[1,1]=qq_plot.qq_plot(data_unif_empirical, data_unif_cdf, ax[1,1], quantiles=np.linspace(0,100,26), 
+    ax[1,1]=qq_plot.qq_data_vs_data(data_unif_empirical, data_unif_cdf, ax[1,1], quantiles=np.linspace(0,100,26), 
                             legend_pos='center left', color='darkorange')
     
     # Some decor

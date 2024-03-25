@@ -11,8 +11,10 @@ https://github.com/arfogg/qq_plot
 import numpy as np
 
 from scipy.stats import linregress
+from scipy.stats import genextreme
+from scipy.stats import gumbel_r
 
-def qq_plot(x_dist, y_dist, ax, quantiles=np.linspace(0,100,101),
+def qq_data_vs_data(x_dist, y_dist, ax, quantiles=np.linspace(0,100,101),
             marker='^', fillstyle='none', color='darkcyan', title='', 
             fit_linear=False, legend_pos='upper left'):
     """
@@ -87,3 +89,67 @@ def qq_plot(x_dist, y_dist, ax, quantiles=np.linspace(0,100,101),
         ax.legend(loc=legend_pos)
         print('Returning Q-Q axis')
         return ax
+    
+    
+def qq_data_vs_model(ax, extrema_ds, extrema_um_empirical, fit_params, 
+                     marker='^', fillstyle='none', color='darkcyan', title='', 
+                     legend_pos='center left'):
+    """
+    Function to generate a QQ plot comparing a GEVD model with
+    detected extrema.
+
+    Parameters
+    ----------
+    ax : matplotlib axis object
+        Axis to draw the QQ plot onto.
+    extrema_ds : np.array
+        Detected extrema in data scale.
+    extrema_um_empirical : np.array
+        Detected extrema on uniform margins
+        (transformed empirically).
+    fit_params : pd.DataFrame
+        Contains columns as returned by
+        fit_model_to_extremes.fit_gevd_or_gumbel.
+    marker : string, optional
+        Markerstyle for the points, feeds into ax.plot. For 
+        valid options see matplotlib.markers. The default is '^'.
+    fillstyle : string, optional
+        Fillstyle for the markers. The default is 'none'.
+    color : string, optional
+        Color for the markers. The default is 'darkcyan'.
+    title : string, optional
+        Title for the axis. The default is ''.
+    legend_pos : string, optional
+        Position to place the legend. The default is 'center 
+        left'.        
+
+    Returns
+    -------
+    ax : matplotlib axis object
+        Axis containing the QQ plot.
+
+    """
+    
+    print('Welcome to the Quantile-Quantile plotting program')
+    
+    # !!! check this with Dáire
+    if fit_params.distribution_name[0]=='genextreme':
+        model_qq=genextreme.ppf(extrema_um_empirical,fit_params.shape_,loc=fit_params.location, scale=fit_params.scale)
+    elif fit_params.distribution_name[0]=='gumbel_r':
+        model_qq=gumbel_r.ppf(extrema_um_empirical,loc=fit_params.location, scale=fit_params.scale)
+
+
+    ax.plot(extrema_ds, model_qq, linewidth=0.0,
+               marker=marker, fillstyle=fillstyle, color=color, label='QQ')
+    
+    # Draw a y=x line
+    min_value = min([min(ax.get_xlim()), min(ax.get_ylim())])
+    max_value = max([max(ax.get_xlim()), max(ax.get_ylim())])
+    
+    ax.plot( [min_value, max_value], [min_value, max_value], linewidth=1.0, linestyle='--', color='black', label='y=x')
+    
+    # Decor
+    ax.set_title(title)
+    ax.legend(loc=legend_pos)
+    
+    return ax
