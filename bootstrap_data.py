@@ -7,6 +7,8 @@ Created on Mon Mar 25 15:38:34 2024
 
 import numpy as np
 
+import transform_uniform_margins
+
 def produce_bootstrap_sample(data, extract_length):
     """
     Function to product a bootstrapping sample from a given 
@@ -74,10 +76,55 @@ def iterative_bootstrap(data, extract_length, n_iterations=100):
         Bootstrap sample of shape data.size x n_iterations.
 
     """
+    print('Producing a bootstrapped sample - may be slow')
+    print('Data length: ', data.size)
+    print('Number of iterations requested: ', n_iterations)
     
     bootstrap_sample=np.full((data.size,n_iterations), np.nan)
+    
     for i in range(n_iterations):
-        
         bootstrap_sample[:,i]=produce_bootstrap_sample(data, extract_length)
         
     return bootstrap_sample
+
+def iterative_bootstrap_um(data, extract_length, n_iterations=100):
+    """
+    Create a matrix of many bootstraps of the same length, 
+    and return data in both data scale and on uniform margins.
+
+    Parameters
+    ----------
+    data : np.array
+        The input data to be bootstrapped. Must be np.array,
+        pd.Series won't work.
+    extract_length : int
+        On average, the data samples appended to the bootstrap
+        will be extract_length number of data points long.
+    n_iterations : int, optional
+        Number of iterations to run. The default is 100.
+
+    Returns
+    -------
+    bootstrap_sample_ds : np.array
+        Bootstrap sample of shape data.size x n_iterations in
+        data scale.
+    bootstrap_sample_um : np.array
+        Bootstrap sample of shape data.size x n_iterations on
+        uniform margins.
+    """
+
+    print('Producing a bootstrapped sample in data scale and on uniform margins - may be slow')
+    print('Data length: ', data.size)
+    print('Number of iterations requested: ', n_iterations)
+    
+    bootstrap_sample_ds=np.full((data.size,n_iterations), np.nan)
+    bootstrap_sample_um=np.full((data.size,n_iterations), np.nan)
+    
+    for i in range(n_iterations):
+        
+        bootstrap_sample_ds[:,i]=produce_bootstrap_sample(data, extract_length)
+        bootstrap_sample_um[:,i]=transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(bootstrap_sample_ds[:,i], plot=False)
+        
+    return bootstrap_sample_ds, bootstrap_sample_um
+
+    
