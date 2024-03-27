@@ -42,7 +42,7 @@ def produce_bootstrap_sample(data, extract_length):
         
         # Choose a random start and end point from the
         #   input data to resample
-        start_point = int( np.random.choice(data, size=1)[0] )
+        start_point = int( np.random.choice(data.size, size=1)[0] )
         end_point = int( start_point + np.random.geometric(1.0 / extract_length, size=1)[0] )
         
         # If not beyond the end of the data, append

@@ -116,9 +116,14 @@ def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, boots
     chi=calculate_extremal_dependence_coefficient(quantiles,x_unif,y_unif)
     
     # Calculate errors on chi
+    print('---------------------TEMP REDUCTION TO N BOOTSTRAP FOR TESTING-------------------------------')
+    bootstrap_n_iterations=10
     chi_lower_bound, chi_upper_bound, bootstrap_chi = calculate_upper_lower_quartile_chi(quantiles, x_bs_um, y_bs_um, bootstrap_n_iterations)
 
-    
+    markers=[".",",","o","v","^","<",">","1","2","3"]
+    for i in range(bootstrap_n_iterations):
+        ax_edc.plot(quantiles,bootstrap_chi[:,i], label=i, marker=markers[i], linewidth=0.0)
+    ax_edc.legend()
 
     # Plot chi as a function of quantiles
     ax_edc.plot(quantiles,chi, color='orange')
