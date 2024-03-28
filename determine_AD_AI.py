@@ -115,20 +115,21 @@ def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, boots
     quantiles=np.linspace(0,0.99,100)
     chi=calculate_extremal_dependence_coefficient(quantiles,x_unif,y_unif)
     
-    # Calculate errors on chi
-    print('---------------------TEMP REDUCTION TO N BOOTSTRAP FOR TESTING-------------------------------')
-    bootstrap_n_iterations=10
+    # # Calculate errors on chi
+    # print('---------------------TEMP REDUCTION TO N BOOTSTRAP FOR TESTING-------------------------------')
+    # bootstrap_n_iterations=10
     chi_lower_bound, chi_upper_bound, bootstrap_chi = calculate_upper_lower_quartile_chi(quantiles, x_bs_um, y_bs_um, bootstrap_n_iterations)
 
-    markers=[".",",","o","v","^","<",">","1","2","3"]
-    for i in range(bootstrap_n_iterations):
-        ax_edc.plot(quantiles,bootstrap_chi[:,i], label=i, marker=markers[i], linewidth=0.0)
-    ax_edc.legend()
+    # markers=[".",",","o","v","^","<",">","1","2","3"]
+    # for i in range(bootstrap_n_iterations):
+    #     ax_edc.plot(quantiles,bootstrap_chi[:,i], label=i, marker=markers[i], linewidth=0.0)
+    # ax_edc.legend()
 
     # Plot chi as a function of quantiles
-    ax_edc.plot(quantiles,chi, color='orange')
+    ax_edc.plot(quantiles,chi, color='black', linewidth=2.0, label='$\chi$')
     # Plot error shade
-    ax_edc.fill_between(quantiles, chi_lower_bound, chi_upper_bound, alpha=0.5, color='grey')
+    ax_edc.fill_between(quantiles, chi_lower_bound, chi_upper_bound, alpha=0.5, color='grey',
+                        label='quantiles*****')
     # Formatting
     ax_edc.set_xlabel("Quantiles", fontsize=csize)
     ax_edc.set_ylabel("Extremal Dependence Coefficient, $\chi$", fontsize=csize)
@@ -138,6 +139,7 @@ def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, boots
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     t_edc=ax_edc.text(0.03, 0.94, '(c)', transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='left')
     t_edc.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))    
+    ax_edc.legend(loc='center right')
 
     fig.tight_layout()
     
