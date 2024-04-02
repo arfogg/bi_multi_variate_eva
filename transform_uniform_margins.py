@@ -73,7 +73,7 @@ def transform_from_data_scale_to_uniform_margins_using_CDF(data, fit_params, dis
     fit_params : df
         For distribution='genextreme', must contain parameters scale, shape_, location.
     distribution : TYPE, optional
-        DESCRIPTION. The default is 'genextreme'.
+        String name for the fitted distribution. The default is 'genextreme'.
     plot : BOOL, optional
         If plot == True, plots the distributions of data in data
         scale and on uniform margins. The default is False.
@@ -218,7 +218,9 @@ def estimate_pdf(x_data,fit_params):
         
     return pdf
 
-def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, data_units_fm, block_size, um_bins=np.linspace(0,1,11)):
+def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,bs_data,
+                    fit_params,data_tag, data_units_fm, block_size,
+                    um_bins=np.linspace(0,1,11), n_ci_bootstrap=100):
     """
     Function to plot the PDF of extremes and the fitted distribution (left),
     and comparing the empirically and CDF determined data on uniform
@@ -234,6 +236,9 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
     data_unif_cdf : np.array
         Detected extremes converted to uniform margins
         using the CDF.
+    bs_data : np.array
+        Bootstrapped extremes on data scale. Of shape
+        data.size x n_ci_bootstrap.
     fit_params : pandas.DataFrame
         df containing tags including distribution_name,
         shape_, scale, location
@@ -309,7 +314,8 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag, 
     
     
     # Return period plot
-    ax[0,2]=return_period_plot_1d.return_period_plot(data, fit_params, block_size, data_tag, data_units_fm, ax[0,2], csize=15)
+    ax[0,2]=return_period_plot_1d.return_period_plot(data, bs_data, fit_params, block_size, data_tag, data_units_fm,
+                                                     ax[0,2], csize=15, n_ci_bootstrap=n_ci_bootstrap)
 
     # TEMPORARY LABEL - REMOVE WHEN COMPLETE
     ax[0,2].text(0.5,0.5,'needs CI shade', transform=ax[0,2].transAxes, va='center', ha='center', fontsize=20)

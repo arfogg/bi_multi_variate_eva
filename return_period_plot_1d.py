@@ -13,10 +13,11 @@ from scipy.stats import gumbel_r
 from scipy import stats
 
 
-def return_period_plot(data, fit_params, block_size, data_tag, data_units_fm, ax, csize=15, line_color='darkcyan', ci=0.95):
+def return_period_plot(data, bs_data, fit_params, block_size, data_tag, data_units_fm, ax,
+                       n_ci_bootstrap=100, csize=15, line_color='darkcyan', ci=0.95):
     
     #data = extrema
-    
+    # bs_data = data.size * n_ci_bootstrap
     
     print('Creating a Return Period plot')
     
@@ -51,6 +52,16 @@ def return_period_plot(data, fit_params, block_size, data_tag, data_units_fm, ax
     ax.plot(model_return_period, model_data, linewidth=1.5, color=line_color, label=fit_params.formatted_dist_name[0])
     
     # Overplot confidence interval
+    # bs_data=np.full((data.size, n_ci_bootstrap), np.nan)
+    bs_return_period=np.full(bs_data.shape,np.nan)
+    for i in range(n_ci_bootstrap):
+    #     bs_data[:,i]=np.sort(np.random.choice(data, size=data.size, replace=True))
+        
+        bs_return_period[:,i]=calculate_return_period_empirical(bs_data[:,i],block_size)
+        ax.plot(bs_return_period[:,i], bs_data[:,i], color='magenta', alpha=0.1)
+        
+         
+   
     # ax.fill_between(x,lower_ci,upper_ci,color='grey',alpha='0.5',label=str(ci*100.)+'% CI')
     
     # Some decor
