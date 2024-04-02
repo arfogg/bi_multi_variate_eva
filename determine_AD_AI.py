@@ -19,7 +19,9 @@ import transform_uniform_margins
 
     
 def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, bootstrap_n_iterations,
-                                         x_name, y_name, x_units, y_units, csize=17):
+                                         x_name, y_name, x_units, y_units, csize=17,
+                                         record_chi_q1=True, percentiles=[2.5, 97.5],
+                                         quantiles=np.linspace(0,0.99,100)):
     """
     Function to create a diagnostic plot to determine whether a pair of 
     variables are asymptotically dependent.
@@ -52,7 +54,16 @@ def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, boots
         String name for axes labelling for y units.
     csize : int, optional
         Fontsize for text on output plot. The default is 17.
-
+    record_chi_q1 : bool, optional
+        If True, the value of chi at maximum quantile is recorded 
+        in a box on the plot. The default is True.
+    percentiles : list, optional
+        Percentiles to evaluate the [lower, upper] 
+        error at. The default is [2.5, 97.5].
+    quantiles : np.array, optional
+        Quantiles to evaluate chi at. The default
+        is np.linspace(0,0.99,100).
+        
     Returns
     -------
     fig : matplotlib figure
@@ -65,6 +76,12 @@ def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, boots
         Axes showing the extremal dependence coefficient as a function of quantile.
     np.min(chi) : float
         Minimum value of the extremal dependence coefficient.
+    chi_lower_q : np.array
+        Value of lower limit on chi (at percentiles[0])
+        as a function of quantiles.
+    chi_upper_q : np.array
+        Value of upper limit on chi (at percentiles[1])
+        as a function of quantiles.
 
     """
 
@@ -112,38 +129,34 @@ def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, boots
     t_unif.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     
     # Calculate the extremal dependence coefficient (chi) over quantiles u 
-    quantiles=np.linspace(0,0.99,100)
     chi=calculate_extremal_dependence_coefficient(quantiles,x_unif,y_unif)
     
-    # # Calculate errors on chi
-    # print('---------------------TEMP REDUCTION TO N BOOTSTRAP FOR TESTING-------------------------------')
-    # bootstrap_n_iterations=10
-    chi_lower_bound, chi_upper_bound, bootstrap_chi = calculate_upper_lower_quartile_chi(quantiles, x_bs_um, y_bs_um, bootstrap_n_iterations)
-
-    # markers=[".",",","o","v","^","<",">","1","2","3"]
-    # for i in range(bootstrap_n_iterations):
-    #     ax_edc.plot(quantiles,bootstrap_chi[:,i], label=i, marker=markers[i], linewidth=0.0)
-    # ax_edc.legend()
+    # Calculate errors on chi
+    chi_lower_q, chi_upper_q, bootstrap_chi = calculate_upper_lower_lim_chi(quantiles, 
+                                                        x_bs_um, y_bs_um, bootstrap_n_iterations, percentiles=percentiles)
 
     # Plot chi as a function of quantiles
     ax_edc.plot(quantiles,chi, color='black', linewidth=2.0, label='$\chi$')
     # Plot error shade
-    ax_edc.fill_between(quantiles, chi_lower_bound, chi_upper_bound, alpha=0.5, color='grey',
-                        label='quantiles*****')
+    ax_edc.fill_between(quantiles, chi_lower_q, chi_upper_q, alpha=0.5, color='grey',
+                        label=("%.1f" % (percentiles[1]-percentiles[0]))+"% CI")
     # Formatting
     ax_edc.set_xlabel("Quantiles", fontsize=csize)
     ax_edc.set_ylabel("Extremal Dependence Coefficient, $\chi$", fontsize=csize)
     for label in (ax_edc.get_xticklabels() + ax_edc.get_yticklabels()):
         label.set_fontsize(csize)
-    t=ax_edc.text(0.95, 0.95, '$\chi _{q=1}$ = '+str(round(chi[-1],3)), transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='right')
-    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     t_edc=ax_edc.text(0.03, 0.94, '(c)', transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='left')
     t_edc.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))    
-    ax_edc.legend(loc='center right')
+    
+    if record_chi_q1:
+        t=ax_edc.text(0.95, 0.95, '$\chi _{q=1}$ = '+str(round(chi[-1],3)), transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='right')
+        t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    
+    ax_edc.legend(loc='lower left', fontsize=csize)
 
     fig.tight_layout()
     
-    return fig, ax_data, ax_data_unif, ax_edc, chi[-1], chi
+    return fig, ax_data, ax_data_unif, ax_edc, chi[-1], chi, chi_lower_q, chi_upper_q
         
 def calculate_extremal_dependence_coefficient(quantiles, x_unif, y_unif):
     """
@@ -175,20 +188,54 @@ def calculate_extremal_dependence_coefficient(quantiles, x_unif, y_unif):
         
     return chi
 
-def calculate_upper_lower_quartile_chi(quantiles, x_bs_um, y_bs_um, bootstrap_n_iterations):
-    
-    # based on bootstrapping
+def calculate_upper_lower_lim_chi(quantiles, x_bs_um, y_bs_um, bootstrap_n_iterations, percentiles=[2.5, 97.5]):
+    """
+    Function to calculate the upper and lower boundary
+    for error shade on chi, based on bootstrapped data.
+
+    Parameters
+    ----------
+    quantiles : np.array
+        Quantiles over which to evaluate the error.
+    x_bs_um : np.array
+        Bootstrapped x values. Of shape n_data x 
+        bootstrap_n_iterations.
+    y_bs_um :  np.array
+        Bootstrapped y values. Of shape n_data x 
+        bootstrap_n_iterations.
+    bootstrap_n_iterations : int
+        Number of iterations to calculate chi over,
+        i.e. number of bootstrapped datasets
+        provided.
+    percentiles : list, optional
+        Percentiles to evaluate the [lower, upper] 
+        error at. The default is [2.5, 97.5].
+
+    Returns
+    -------
+    lower_q : np.array
+        Value of lower limit on chi (at percentiles[0])
+        as a function of quantiles.
+    upper_q : np.array
+        Value of upper limit on chi (at percentiles[0])
+        as a function of quantiles.
+    bts_chi : np.array
+        Bootstrapped calculation of chi. Of shape
+        quantiles.size x bootstrap_n_iterations.
+
+    """
     
     print('Estimating chi over '+str(bootstrap_n_iterations)+' bootstrapped iterations - may be slow')
     bts_chi=np.full((quantiles.size,bootstrap_n_iterations), np.nan)
+    # Calculate chi over each set of bootstrapped x and y
     for i in range(bootstrap_n_iterations):
-        print(i)
         bts_chi[:,i]=calculate_extremal_dependence_coefficient(quantiles, x_bs_um[:,i], y_bs_um[:,i])
     
     lower_q=np.full(quantiles.size, np.nan)
     upper_q=np.full(quantiles.size, np.nan)
+    # Calculate the errors from these bootstrapped chi
     for j in range(quantiles.size):
-        lower_q[j], upper_q[j]=np.percentile(bts_chi[j,:],[2.5,97.5])
+        lower_q[j], upper_q[j]=np.percentile(bts_chi[j,:],percentiles)
     
     return lower_q, upper_q, bts_chi
         
