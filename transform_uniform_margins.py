@@ -338,8 +338,7 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,bs_dict,
 
     
     # Return values table
-    ax[1,2].text(0.5,0.5,'needs CI', transform=ax[1,2].transAxes, va='center', ha='center', fontsize=20)
-    ax[1,2]=return_period_plot_1d.return_period_table_ax(ax[1,2], fit_params, block_size, data_units_fm)
+    ax[1,2]=return_period_plot_1d.return_period_table_ax(ax[1,2], fit_params, block_size, data_units_fm, bs_dict)
     
     # Some decor
     t=ax[1,2].text(0.03, 0.90, '(f)', transform=ax[1,2].transAxes, va='top', ha='left')

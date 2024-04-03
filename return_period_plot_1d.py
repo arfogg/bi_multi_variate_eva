@@ -82,7 +82,8 @@ def return_period_plot(data, bs_dict, fit_params, block_size, data_tag, data_uni
     plot_ind,=np.where(bs_dict['periods'] <= np.max(model_return_period))
     percentiles=np.percentile(bs_dict['levels'][plot_ind,], ci_percentiles, axis=1).T
     ax.plot(bs_dict['periods'][plot_ind], percentiles, color='grey', linestyle="--", linewidth=1.0)
-    ax.fill_between(bs_dict['periods'][plot_ind],percentiles[:,0],percentiles[:,1],color='grey',alpha=0.5,label=str(ci_percentiles[1]-ci_percentiles[0])+'% CI')
+    ax.fill_between(bs_dict['periods'][plot_ind],percentiles[:,0],percentiles[:,1],color='grey',alpha=0.5,
+                    label=str(ci_percentiles[1]-ci_percentiles[0])+'% CI')
     
     # Some decor
     ax.set_xlabel('Return Period (years)')
@@ -93,8 +94,9 @@ def return_period_plot(data, bs_dict, fit_params, block_size, data_tag, data_uni
 
     return ax
 
-def return_period_table_ax(ax, fit_params, block_size, data_units_fm,
-                           periods=np.array([2, 5, 10, 15, 20, 25, 50, 100]), ci=0.95):
+def return_period_table_ax(ax, fit_params, block_size, data_units_fm, bs_dict,
+                           periods=np.array([2, 5, 10, 15, 20, 25, 50, 100]), 
+                           ci_percentiles=[2.5, 97.5]):
     """
     Function to generate a table of return levels, at
     given periods, on the input axis object.
@@ -110,13 +112,30 @@ def return_period_table_ax(ax, fit_params, block_size, data_units_fm,
         Size chosen for block maxima selection.
     data_units_fm : string
         Units for data to be put in axes labels etc.
+    bs_dict : dictionary
+        Containing keys listed below.
+        n_iterations = number of bootstrap iterations
+        bs_data = bootstrapped extrema, of shape 
+            number of extrema x n_iterations
+        n_ci_iterations = number of iterations for
+            calculation of confidence interval
+        periods = return periods to evaluate level at
+            for confidence interval calculation
+        levels = return levels across n_ci_iterations
+            of model fits
+        distribution_name = 'genextreme' or 'gumbel_r'
+        shape_ = array of shape parameters from fitting
+        location = array of location parameters from 
+            fitting
+        scale = array of scale parameters from fitting
     periods : np.array, optional
         Array of return periods (in years) to evaluate
         the return level at. 
         The default is np.array([2, 5, 10, 15, 20, 25, 50, 100]).
-    ci : float, optional
-        Decimal confidence interval for errors (i.e. 0.95 is 
-        95% confidence interval). The default is 0.95.
+    ci_percentiles : list, optional
+        Pair of floats which define the upper and lower
+        percentiles of the confidence interval shade. 
+        The default is [2.5, 97.5].
 
     Returns
     -------
@@ -126,12 +145,20 @@ def return_period_table_ax(ax, fit_params, block_size, data_units_fm,
     """
     print('Creating a table of return periods and values')
     
+    # Calculate return level
     levels = calculate_return_value_CDF(periods, fit_params, block_size)
+    
+    # Confidence intervals
+    period_ind=np.full(periods.size, np.nan)
+    for i in range(period_ind.size):
+        period_ind[i],=np.where(bs_dict['periods'] == periods[i])
+    period_ind=period_ind.astype('int')
+    percentiles=np.percentile(bs_dict['levels'][period_ind,], ci_percentiles, axis=1).T
     
     table_df=pd.DataFrame({"period\n(years)":periods,
                           "level\n("+data_units_fm+")":["%.2f" % v for v in levels],
-                          "-"+str("%.0f" % (ci*100))+"% CI":np.full(levels.size,"TBC"),
-                          "+"+str("%.0f" % (ci*100))+"% CI":np.full(levels.size,"TBC")
+                          "-"+str("%.0f" % (ci_percentiles[1]-ci_percentiles[0]))+"% CI":["%.2f" % v for v in percentiles[:,0]],
+                          "+"+str("%.0f" % (ci_percentiles[1]-ci_percentiles[0]))+"% CI":["%.2f" % v for v in percentiles[:,1]]
                           })
     
     table = ax.table(cellText=table_df.values, colLabels=table_df.columns, loc='center')
@@ -265,30 +292,61 @@ def calculate_return_value_CDF(periods, fit_params, block_size):
 
 def return_level_bootstrapped_data(bs_data, n_bootstrap, distribution_name, block_size,
                                    return_periods):
-    
+    """
     
 
-        
+    Parameters
+    ----------
+    bs_data : np.array
+        Bootstrapped extrema. Of shape number
+        of extrema x n_bootstrap.
+    n_bootstrap : int
+        Number of desired bootstraps. 
+    distribution_name : string
+        Distribution to fit to for bootstraps. 
+    block_size : pd.Timedelta
+        Size over which block maxima have been found,
+        e.g. pd.to_timedelta("365.2425D").
+    return_periods : np.array
+        Return periods to calculate return levels at.
 
+    Returns
+    -------
+    levels : np.array
+        Return levels at parsed return periods. Of
+        shape return_periods.size x
+    shape_ : np.array
+        Shape parameters for GEVD/Gumbel fits.
+    location : np.array
+        Location parameters for GEVD/Gumbel fits.
+    scale : np.array
+        Scale parameters for GEVD/Gumbel fits.
+
+    """
+
+    # For GEVD distribution
     if distribution_name == 'genextreme':
         shape_=np.full(n_bootstrap, np.full)
         location=np.full(n_bootstrap, np.full)
         scale=np.full(n_bootstrap, np.full)        
-
+        # Fit GEVD for each bootstrap iteration
         for i in range(n_bootstrap):
-            shape_[i],location[i],scale[i]=genextreme.fit(bs_data[:,i])
-            
+            shape_[i],location[i],scale[i]=genextreme.fit(bs_data[:,i])      
     
+    # For Gumbel distribution
     elif distribution_name == 'gumbel_r':
         shape_=np.full(n_bootstrap, 0.0)
         location=np.full(n_bootstrap, np.full)
         scale=np.full(n_bootstrap, np.full)        
-
+        # Fit Gumbel for each bootstrap iteration
         for i in range(n_bootstrap):
             location[i],scale[i]=gumbel_r.fit(bs_data[:,i])
     
     levels=np.full((return_periods.size, n_bootstrap), np.nan)
     for i in range(n_bootstrap):
+        # For each bootstrap iteration, calculate the return level
+        #   as a function of the parsed return periods, given the 
+        #   iterated fitting parameters
         levels[:,i]=calculate_return_value_CDF(return_periods, 
                                                pd.DataFrame({'distribution_name':distribution_name,
                                                              'shape_':shape_[i],
