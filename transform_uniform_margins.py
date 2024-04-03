@@ -218,9 +218,9 @@ def estimate_pdf(x_data,fit_params):
         
     return pdf
 
-def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,bs_data,
+def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,bs_dict,
                     fit_params,data_tag, data_units_fm, block_size,
-                    um_bins=np.linspace(0,1,11), n_ci_bootstrap=100):
+                    um_bins=np.linspace(0,1,11)):
     """
     Function to plot the PDF of extremes and the fitted distribution (left),
     and comparing the empirically and CDF determined data on uniform
@@ -236,9 +236,22 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,bs_data,
     data_unif_cdf : np.array
         Detected extremes converted to uniform margins
         using the CDF.
-    bs_data : np.array
-        Bootstrapped extremes on data scale. Of shape
-        data.size x n_ci_bootstrap.
+    bs_dict : dictionary
+        Containing keys listed below.
+        n_iterations = number of bootstrap iterations
+        bs_data = bootstrapped extrema, of shape 
+            number of extrema x n_iterations
+        n_ci_iterations = number of iterations for
+            calculation of confidence interval
+        periods = return periods to evaluate level at
+            for confidence interval calculation
+        levels = return levels across n_ci_iterations
+            of model fits
+        distribution_name = 'genextreme' or 'gumbel_r'
+        shape_ = array of shape parameters from fitting
+        location = array of location parameters from 
+            fitting
+        scale = array of scale parameters from fitting
     fit_params : pandas.DataFrame
         df containing tags including distribution_name,
         shape_, scale, location
@@ -247,7 +260,8 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,bs_data,
     data_units_fm : string
         units for data to be put in axes labels etc
     block_size : pd.Timedelta
-        Size over which block maxima have been found, e.g. pd.to_timedelta("365.2425D").
+        Size over which block maxima have been found,
+        e.g. pd.to_timedelta("365.2425D").
     um_bins : np.array
         array defining the edges of the bins for the 
         uniform margins histograms
@@ -314,11 +328,9 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,bs_data,
     
     
     # Return period plot
-    ax[0,2]=return_period_plot_1d.return_period_plot(data, bs_data, fit_params, block_size, data_tag, data_units_fm,
-                                                     ax[0,2], csize=15, n_ci_bootstrap=n_ci_bootstrap)
-
-    # TEMPORARY LABEL - REMOVE WHEN COMPLETE
-    ax[0,2].text(0.5,0.5,'needs CI shade', transform=ax[0,2].transAxes, va='center', ha='center', fontsize=20)
+    ax[0,2]=return_period_plot_1d.return_period_plot(data, bs_dict, fit_params, block_size, 
+                                                     data_tag, data_units_fm,
+                                                     ax[0,2], csize=15)
     
     # Some decor
     t=ax[0,2].text(0.06, 0.94, '(c)', transform=ax[0,2].transAxes, va='top', ha='left')

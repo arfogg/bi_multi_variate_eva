@@ -13,34 +13,61 @@ from scipy.stats import gumbel_r
 from scipy import stats
 
 
-def return_period_plot(data, bs_data, fit_params, block_size, data_tag, data_units_fm, ax,
-                       n_ci_bootstrap=100, csize=15, line_color='darkcyan', ci=0.95):
-    
-    #data = extrema
-    # bs_data = data.size * n_ci_bootstrap
-    
+def return_period_plot(data, bs_dict, fit_params, block_size, data_tag, data_units_fm, ax,
+                       csize=15, line_color='darkcyan', ci_percentiles=[2.5, 97.5]):
+    """
+    Function to generate a return period plot.
+
+    Parameters
+    ----------
+    data : np.array
+        Observed extrema.
+    bs_dict : dictionary
+        Containing keys listed below.
+        n_iterations = number of bootstrap iterations
+        bs_data = bootstrapped extrema, of shape 
+            number of extrema x n_iterations
+        n_ci_iterations = number of iterations for
+            calculation of confidence interval
+        periods = return periods to evaluate level at
+            for confidence interval calculation
+        levels = return levels across n_ci_iterations
+            of model fits
+        distribution_name = 'genextreme' or 'gumbel_r'
+        shape_ = array of shape parameters from fitting
+        location = array of location parameters from 
+            fitting
+        scale = array of scale parameters from fitting
+    fit_params : pandas.DataFrame
+        df containing tags including distribution_name,
+        shape_, scale, location
+    block_size : pd.Timedelta
+        Size over which block maxima have been found,
+        e.g. pd.to_timedelta("365.2425D").
+    data_tag : string
+        name of data to be put in figure captions etc
+    data_units_fm : string
+        units for data to be put in axes labels etc
+    ax : Matplotlib axes object
+        Axes to do the plotting on.
+    csize : int, optional
+        Fontsize for the labels etc. The default is 15.
+    line_color : string, optional
+        Named Matplotlib color for the fitted model
+        line. The default is 'darkcyan'.
+    ci_percentiles : list, optional
+        Pair of floats which define the upper and lower
+        percentiles of the confidence interval shade. 
+        The default is [2.5, 97.5].
+
+    Returns
+    -------
+    ax : Matplotlib axes object
+        Return period plot.
+
+    """
+       
     print('Creating a Return Period plot')
-    
-    #options
-    # % CI
-    
-    
-    
-    
-
-    # observed_return_values=pyextremes.get_return_periods(ts=eva_model.data, extremes=eva_model.extremes, 
-    #         extremes_method=eva_model.extremes_method, extremes_type=eva_model.extremes_type,
-    #         block_size=eva_model.extremes_kwargs.get("block_size", None), return_period_size='365.2425D' )
-    # return_period=np.linspace(observed_return_values.loc[:, "return period"].min(),
-    #         observed_return_values.loc[:, "return period"].max(),100,)    
-    # modeled_return_values = eva_model.get_summary(return_period=return_period, return_period_size='365.2425D',alpha=0.95)
-
-    # ax_model[0,0].plot(observed_return_values['return period'], observed_return_values[tag], linewidth=0.0, marker='^', fillstyle='none', color='black', label='Observations')
-    # ax_model[0,0].plot(modeled_return_values.index, modeled_return_values['return value'], linewidth=2.0, color='coral', label='Model')
-    # ax_model[0,0].fill_between(modeled_return_values.index, modeled_return_values['lower ci'], modeled_return_values['upper ci'], color='grey', alpha=0.5, label='95% CI')
-    
-  
-    
     
     # Plot observed extremes as a function of their return period
     empirical_return_period=calculate_return_period_empirical(data, block_size)
@@ -52,17 +79,10 @@ def return_period_plot(data, bs_data, fit_params, block_size, data_tag, data_uni
     ax.plot(model_return_period, model_data, linewidth=1.5, color=line_color, label=fit_params.formatted_dist_name[0])
     
     # Overplot confidence interval
-    # bs_data=np.full((data.size, n_ci_bootstrap), np.nan)
-    bs_return_period=np.full(bs_data.shape,np.nan)
-    for i in range(n_ci_bootstrap):
-    #     bs_data[:,i]=np.sort(np.random.choice(data, size=data.size, replace=True))
-        
-        bs_return_period[:,i]=calculate_return_period_empirical(bs_data[:,i],block_size)
-        ax.plot(bs_return_period[:,i], bs_data[:,i], color='magenta', alpha=0.1)
-        
-         
-   
-    # ax.fill_between(x,lower_ci,upper_ci,color='grey',alpha='0.5',label=str(ci*100.)+'% CI')
+    plot_ind,=np.where(bs_dict['periods'] <= np.max(model_return_period))
+    percentiles=np.percentile(bs_dict['levels'][plot_ind,], ci_percentiles, axis=1).T
+    ax.plot(bs_dict['periods'][plot_ind], percentiles, color='grey', linestyle="--", linewidth=1.0)
+    ax.fill_between(bs_dict['periods'][plot_ind],percentiles[:,0],percentiles[:,1],color='grey',alpha=0.5,label=str(ci_percentiles[1]-ci_percentiles[0])+'% CI')
     
     # Some decor
     ax.set_xlabel('Return Period (years)')
@@ -242,3 +262,39 @@ def calculate_return_value_CDF(periods, fit_params, block_size):
                               loc=fit_params.location, scale=fit_params.scale)
     
     return levels
+
+def return_level_bootstrapped_data(bs_data, n_bootstrap, distribution_name, block_size,
+                                   return_periods):
+    
+    
+
+        
+
+    if distribution_name == 'genextreme':
+        shape_=np.full(n_bootstrap, np.full)
+        location=np.full(n_bootstrap, np.full)
+        scale=np.full(n_bootstrap, np.full)        
+
+        for i in range(n_bootstrap):
+            shape_[i],location[i],scale[i]=genextreme.fit(bs_data[:,i])
+            
+    
+    elif distribution_name == 'gumbel_r':
+        shape_=np.full(n_bootstrap, 0.0)
+        location=np.full(n_bootstrap, np.full)
+        scale=np.full(n_bootstrap, np.full)        
+
+        for i in range(n_bootstrap):
+            location[i],scale[i]=gumbel_r.fit(bs_data[:,i])
+    
+    levels=np.full((return_periods.size, n_bootstrap), np.nan)
+    for i in range(n_bootstrap):
+        levels[:,i]=calculate_return_value_CDF(return_periods, 
+                                               pd.DataFrame({'distribution_name':distribution_name,
+                                                             'shape_':shape_[i],
+                                                             'location':location[i],
+                                                             'scale':scale[i]}, index=[0]),
+                                               block_size)
+
+    return levels, shape_, location, scale
+        
