@@ -20,7 +20,7 @@ import transform_uniform_margins
     
 def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, bootstrap_n_iterations,
                                          x_name, y_name, x_units, y_units, csize=17,
-                                         record_chi_q1=True, percentiles=[2.5, 97.5],
+                                         percentiles=[2.5, 97.5],
                                          quantiles=np.linspace(0,0.99,100)):
     """
     Function to create a diagnostic plot to determine whether a pair of 
@@ -54,9 +54,6 @@ def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, boots
         String name for axes labelling for y units.
     csize : int, optional
         Fontsize for text on output plot. The default is 17.
-    record_chi_q1 : bool, optional
-        If True, the value of chi at maximum quantile is recorded 
-        in a box on the plot. The default is True.
     percentiles : list, optional
         Percentiles to evaluate the [lower, upper] 
         error at. The default is [2.5, 97.5].
@@ -148,15 +145,15 @@ def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, boots
     t_edc=ax_edc.text(0.03, 0.94, '(c)', transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='left')
     t_edc.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))    
     
-    if record_chi_q1:
-        t=ax_edc.text(0.95, 0.95, '$\chi _{q=1}$ = '+str(round(chi[-1],3)), transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='right')
-        t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    # if record_chi_q1:
+    #     t=ax_edc.text(0.95, 0.95, '$\chi _{q=1}$ = '+str(round(chi[-1],3)), transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='right')
+    #     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     
     ax_edc.legend(loc='lower left', fontsize=csize)
 
     fig.tight_layout()
     
-    return fig, ax_data, ax_data_unif, ax_edc, chi[-1], chi, chi_lower_q, chi_upper_q
+    return fig, ax_data, ax_data_unif, ax_edc, chi, chi_lower_q, chi_upper_q
         
 def calculate_extremal_dependence_coefficient(quantiles, x_unif, y_unif):
     """
