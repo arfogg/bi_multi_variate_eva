@@ -13,6 +13,9 @@ import matplotlib.pyplot as plt
 from scipy.stats import genextreme
 from scipy.stats import gumbel_r
 
+import qq_plot
+import return_period_plot_1d
+
 def transform_from_data_scale_to_uniform_margins_empirically(data, plot=False):
     """
     Transform the data to uniform margins empirically
@@ -70,7 +73,7 @@ def transform_from_data_scale_to_uniform_margins_using_CDF(data, fit_params, dis
     fit_params : df
         For distribution='genextreme', must contain parameters scale, shape_, location.
     distribution : TYPE, optional
-        DESCRIPTION. The default is 'genextreme'.
+        String name for the fitted distribution. The default is 'genextreme'.
     plot : BOOL, optional
         If plot == True, plots the distributions of data in data
         scale and on uniform margins. The default is False.
@@ -215,7 +218,9 @@ def estimate_pdf(x_data,fit_params):
         
     return pdf
 
-def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
+def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,bs_dict,
+                    fit_params,data_tag, data_units_fm, block_size,
+                    um_bins=np.linspace(0,1,11)):
     """
     Function to plot the PDF of extremes and the fitted distribution (left),
     and comparing the empirically and CDF determined data on uniform
@@ -231,11 +236,35 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
     data_unif_cdf : np.array
         Detected extremes converted to uniform margins
         using the CDF.
+    bs_dict : dictionary
+        Containing keys listed below.
+        n_iterations = number of bootstrap iterations
+        bs_data = bootstrapped extrema, of shape 
+            number of extrema x n_iterations
+        n_ci_iterations = number of iterations for
+            calculation of confidence interval
+        periods = return periods to evaluate level at
+            for confidence interval calculation
+        levels = return levels across n_ci_iterations
+            of model fits
+        distribution_name = 'genextreme' or 'gumbel_r'
+        shape_ = array of shape parameters from fitting
+        location = array of location parameters from 
+            fitting
+        scale = array of scale parameters from fitting
     fit_params : pandas.DataFrame
         df containing tags including distribution_name,
         shape_, scale, location
     data_tag : string
         name of data to be put in figure captions etc
+    data_units_fm : string
+        units for data to be put in axes labels etc
+    block_size : pd.Timedelta
+        Size over which block maxima have been found,
+        e.g. pd.to_timedelta("365.2425D").
+    um_bins : np.array
+        array defining the edges of the bins for the 
+        uniform margins histograms
 
     Returns
     -------
@@ -243,37 +272,79 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
 
     """
     # Initialise figure and axes
-    fig,ax=plt.subplots(ncols=2,figsize=(8,4))
+    fig,ax=plt.subplots(ncols=3, nrows=2, figsize=(13,8))
         
     # Plot normalised histogram of extremes
-    ax[0].hist(data, bins=25, density=True, rwidth=0.8, color='deepskyblue', label='extremes')
+    ax[0,0].hist(data, bins=np.linspace(np.nanmin(data),np.nanmax(data),25), density=True, rwidth=0.8, color='darkgrey', label='extremes')
         
     # Initialise arrays
     model_x=np.linspace(np.nanmin(data),np.nanmax(data), 100)
     model_y=estimate_pdf(model_x,fit_params)
     
     # Plot the PDF against x
-    ax[0].plot(model_x,model_y, color='darkmagenta', label=fit_params.distribution_name[0])
+    ax[0,0].plot(model_x,model_y, color='darkmagenta', label=fit_params.formatted_dist_name[0])
     
     # Some decor
-    ax[0].set_ylabel('Normalised Occurrence')
-    ax[0].set_xlabel('Data in data scale')    
-    ax[0].legend(loc='upper right')
-    t=ax[0].text(0.06, 0.94, '(a)', transform=ax[0].transAxes, va='top', ha='left')
+    ax[0,0].set_ylabel('Normalised Occurrence')
+    ax[0,0].set_xlabel(data_tag + ' in data scale ('+data_units_fm+')')    
+    t=ax[0,0].text(0.06, 0.94, '(a)', transform=ax[0,0].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[0].set_title(fit_params.distribution_name[0]+' fit assessment for '+data_tag)
+    ax[0,0].set_title(fit_params.formatted_dist_name[0]+' fit assessment for '+data_tag)
 
     # Plot normalised histograms of different uniform margins data
-    ax[1].hist(data_unif_cdf, bins=25, density=True, rwidth=0.8, color='darkorange', label='using CDF')
-    ax[1].hist(data_unif_empirical, bins=25, density=True, rwidth=0.8, color='grey', alpha=0.5, label='empirical')
+    ax[0,1].hist(data_unif_cdf, bins=um_bins, density=True, rwidth=0.8, color='darkorange', label='using CDF')
+    ax[0,1].hist(data_unif_empirical, bins=um_bins, density=True, rwidth=0.8, color='grey', alpha=0.5, label='empirical')
     
     # Some decor
-    ax[1].set_ylabel('Normalised Occurrence')
-    ax[1].set_xlabel('Data on uniform margins '+data_tag)
-    ax[1].legend(loc='upper right')
-    t=ax[1].text(0.06, 0.94, '(b)', transform=ax[1].transAxes, va='top', ha='left')
+    ax[0,1].set_ylabel('Normalised Occurrence')
+    ax[0,1].set_xlabel(data_tag + ' on uniform margins')
+    ax[0,1].legend(loc='upper right')
+    t=ax[0,1].text(0.06, 0.94, '(b)', transform=ax[0,1].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[1].set_title('Comparison of data on uniform margins')
+    ax[0,1].set_title('Comparison of data on uniform margins')
+    ax[0,0].legend(loc='upper right')
+    
+    # QQ plot comparing the extremes and their PDF
+    ax[1,0]=qq_plot.qq_data_vs_model(ax[1,0], data, data_unif_empirical, fit_params, 
+                         marker='^', fillstyle='none', color='darkmagenta', title='', 
+                         legend_pos='center left')
+    
+    # Some decor
+    ax[1,0].set_xlabel('Extremes')
+    ax[1,0].set_ylabel('Fitted '+fit_params.formatted_dist_name[0]+' distribution')
+    t=ax[1,0].text(0.06, 0.94, '(d)', transform=ax[1,0].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))    
+    
+    # QQ plot comparing the uniform margins distributions
+    ax[1,1]=qq_plot.qq_data_vs_data(data_unif_empirical, data_unif_cdf, ax[1,1], quantiles=np.linspace(0,100,26), 
+                            legend_pos='center left', color='darkorange')
+    
+    # Some decor
+    ax[1,1].set_xlabel('Empirical')
+    ax[1,1].set_ylabel('CDF')
+    t=ax[1,1].text(0.06, 0.94, '(e)', transform=ax[1,1].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    
+    
+    
+    # Return period plot
+    ax[0,2]=return_period_plot_1d.return_period_plot(data, bs_dict, fit_params, block_size, 
+                                                     data_tag, data_units_fm,
+                                                     ax[0,2], csize=15)
+    
+    # Some decor
+    t=ax[0,2].text(0.06, 0.94, '(c)', transform=ax[0,2].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+
+    
+    # Return values table
+    ax[1,2]=return_period_plot_1d.return_period_table_ax(ax[1,2], fit_params, block_size, data_units_fm, bs_dict)
+    
+    # Some decor
+    t=ax[1,2].text(0.03, 0.90, '(f)', transform=ax[1,2].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))    
+    
+    
     
     fig.tight_layout()
 
@@ -281,7 +352,8 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,fit_params,data_tag):
     
     return fig, ax
     
-def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale, y_sample_data_scale, x_fit_params, y_fit_params, x_name, y_name):
+def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale, y_sample_data_scale,
+                           x_fit_params, y_fit_params, x_name, y_name, um_bins=np.linspace(0,1,11)):
     """
     Function to plot diagnostic to assess copula fit.
 
@@ -305,6 +377,9 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
         String name for x. Used for labelling plots.
     y_name : string
         String name for y. Used for labelling plots.
+    um_bins : np.array
+        array defining the edges of the bins for the 
+        uniform margins histograms
 
     Returns
     -------
@@ -316,63 +391,71 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
     """
     
     
-    fig, ax=plt.subplots(nrows=2,ncols=2, figsize=(7,7))
+    fig, ax=plt.subplots(nrows=2,ncols=3, figsize=(11,7))
     
     # FOR X PARAMETER
+    
+    # Plot normalised histogram of copula sample on uniform margins
+    ax[0,0].hist(copula_x_sample, bins=um_bins, density=True, rwidth=0.8, color='darkorange', label=x_name+' copula sample\n(uniform margins)')
+
+    # Some decor
+    ax[0,0].set_xlabel('Copula sample for '+x_name)
+    ax[0,0].set_ylabel('Normalised Occurrence')
+    ax[0,0].set_title('Copula sample on uniform margins')
+    t=ax[0,0].text(0.06, 0.94, '(b)', transform=ax[0,0].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    ax[0,0].legend(loc='upper right') 
+    
     # Plot normalised histogram of copula sample in data scale
-    ax[0,0].hist(x_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label='x copula sample\n(data scale)')
+    ax[0,1].hist(x_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label=x_name+' copula\nsample\n(data scale)')
     
     # Overplot distribution
     model_x=np.linspace(np.nanmin(x_sample_data_scale),np.nanmax(x_sample_data_scale), 100)
     model_y=estimate_pdf(model_x,x_fit_params)
-    ax[0,0].plot(model_x,model_y, color='darkmagenta', label=x_fit_params.distribution_name[0])
+    ax[0,1].plot(model_x,model_y, color='darkmagenta', label=x_fit_params.formatted_dist_name[0])
     
     # Some decor
-    ax[0,0].set_xlabel('Data scale for '+x_name)
-    ax[0,0].set_ylabel('Normalised Occurrence')
-    ax[0,0].set_title('Copula sample vs '+x_fit_params.distribution_name[0]+' (data scale)')
-    t=ax[0,0].text(0.06, 0.94, '(a)', transform=ax[0,0].transAxes, va='top', ha='left')
-    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[0,0].legend(loc='upper right')
-    
-    # Plot normalised histogram of copula sample on uniform margins
-    ax[0,1].hist(copula_x_sample, bins=25, density=True, rwidth=0.8, color='darkorange', label='copula sample')
-
-    # Some decor
-    ax[0,1].set_xlabel('Copula sample for '+x_name)
+    ax[0,1].set_xlabel('Data scale for '+x_name)
     ax[0,1].set_ylabel('Normalised Occurrence')
-    ax[0,1].set_title('Copula sample on uniform margins')
-    t=ax[0,1].text(0.06, 0.94, '(b)', transform=ax[0,1].transAxes, va='top', ha='left')
+    ax[0,1].set_title('Copula sample vs '+x_fit_params.formatted_dist_name[0]+' (data scale)')
+    t=ax[0,1].text(0.06, 0.94, '(a)', transform=ax[0,1].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[0,1].legend(loc='upper right')    
+    ax[0,1].legend(loc='upper right')
+    
+    # QQ plot comparing Copula sample in data scale with GEVD fit
+    ax[0,2].text(0.5,0.5,'QQ TBC', transform=ax[0,2].transAxes, va='center', ha='center')
 
     # FOR Y PARAMETER
+    # Plot normalised histogram of copula sample on uniform margins
+    ax[1,0].hist(copula_y_sample, bins=um_bins, density=True, rwidth=0.8, color='darkorange', label=y_name+' copula sample\n(uniform margins)')
+
+    # Some decor
+    ax[1,0].set_xlabel('Copula sample for '+y_name)
+    ax[1,0].set_ylabel('Normalised Occurrence')
+    ax[1,0].set_title('Copula sample on uniform margins')
+    t=ax[1,0].text(0.06, 0.94, '(d)', transform=ax[1,0].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    ax[1,0].legend(loc='upper right')
+
     # Plot normalised histogram of copula sample in data scale
-    ax[1,0].hist(y_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label='y copula sample\n(data scale)')
+    ax[1,1].hist(y_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label=y_name+' copula\nsample\n(data scale)')
     
     # Overplot distribution
     model_x=np.linspace(np.nanmin(y_sample_data_scale),np.nanmax(y_sample_data_scale), 100)
     model_y=estimate_pdf(model_x,y_fit_params)
-    ax[1,0].plot(model_x,model_y, color='darkmagenta', label=y_fit_params.distribution_name[0])
+    ax[1,1].plot(model_x,model_y, color='darkmagenta', label=y_fit_params.formatted_dist_name[0])
     
     # Some decor
-    ax[1,0].set_xlabel('Data scale for '+y_name)
-    ax[1,0].set_ylabel('Normalised Occurrence')
-    ax[1,0].set_title('Copula sample vs '+y_fit_params.distribution_name[0]+' (data scale)')
-    t=ax[1,0].text(0.06, 0.94, '(c)', transform=ax[1,0].transAxes, va='top', ha='left')
-    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[1,0].legend(loc='upper right')    
-    
-    # Plot normalised histogram of copula sample on uniform margins
-    ax[1,1].hist(copula_y_sample, bins=25, density=True, rwidth=0.8, color='darkorange', label='copula sample')
-
-    # Some decor
-    ax[1,1].set_xlabel('Copula sample for '+y_name)
+    ax[1,1].set_xlabel('Data scale for '+y_name)
     ax[1,1].set_ylabel('Normalised Occurrence')
-    ax[1,1].set_title('Copula sample on uniform margins')
-    t=ax[1,1].text(0.06, 0.94, '(d)', transform=ax[1,1].transAxes, va='top', ha='left')
+    ax[1,1].set_title('Copula sample vs '+y_fit_params.formatted_dist_name[0]+' (data scale)')
+    t=ax[1,1].text(0.06, 0.94, '(c)', transform=ax[1,1].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[1,1].legend(loc='upper right')
+    ax[1,1].legend(loc='upper right')    
+    
+    # QQ plot comparing Copula sample in data scale with GEVD fit
+    ax[1,2].text(0.5,0.5,'QQ TBC', transform=ax[1,2].transAxes, va='center', ha='center')
+
     
     fig.tight_layout()
     
