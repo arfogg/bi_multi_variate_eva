@@ -256,7 +256,7 @@ def plot_return_period_as_function_x_y_3d(copula,min_x,max_x,min_y,max_y,x_name,
     surf = ax.plot_surface(mid_point_x_ds,mid_point_y_ds,shaped_return_period, cmap='plasma',
                            linewidth=0, antialiased=False)
     
-    print(np.min(shaped_return_period),np.max(shaped_return_period))
+    #print(np.min(shaped_return_period),np.max(shaped_return_period))
     
     ax.set_zscale('log')
     
