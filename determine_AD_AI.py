@@ -21,7 +21,8 @@ import transform_uniform_margins
 def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, bootstrap_n_iterations,
                                          x_name, y_name, x_units, y_units, csize=17,
                                          percentiles=[2.5, 97.5],
-                                         quantiles=np.linspace(0,0.99,100)):
+                                         quantiles=np.linspace(0,0.99,100),
+                                         edc_ylims=[0,1]):
     """
     Function to create a diagnostic plot to determine whether a pair of 
     variables are asymptotically dependent.
@@ -60,6 +61,9 @@ def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, boots
     quantiles : np.array, optional
         Quantiles to evaluate chi at. The default
         is np.linspace(0,0.99,100).
+    edc_ylims : list, optional
+        Bottom and top limits for the extremal
+        dependence coefficient axis. The default is [0,1].
         
     Returns
     -------
@@ -145,9 +149,8 @@ def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, boots
     t_edc=ax_edc.text(0.03, 0.94, '(c)', transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='left')
     t_edc.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))    
     
-    # if record_chi_q1:
-    #     t=ax_edc.text(0.95, 0.95, '$\chi _{q=1}$ = '+str(round(chi[-1],3)), transform=ax_edc.transAxes, fontsize=csize,  va='top', ha='right')
-    #     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    # Set ylimits
+    ax_edc.set_ylim(edc_ylims)
     
     ax_edc.legend(loc='lower left', fontsize=csize)
 
