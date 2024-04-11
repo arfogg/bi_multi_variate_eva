@@ -402,7 +402,7 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
     ax[0,0].set_xlabel('Copula sample for '+x_name)
     ax[0,0].set_ylabel('Normalised Occurrence')
     ax[0,0].set_title('Copula sample on uniform margins')
-    t=ax[0,0].text(0.06, 0.94, '(b)', transform=ax[0,0].transAxes, va='top', ha='left')
+    t=ax[0,0].text(0.06, 0.94, '(a)', transform=ax[0,0].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     ax[0,0].legend(loc='upper right') 
     
@@ -418,12 +418,17 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
     ax[0,1].set_xlabel('Data scale for '+x_name)
     ax[0,1].set_ylabel('Normalised Occurrence')
     ax[0,1].set_title('Copula sample vs '+x_fit_params.formatted_dist_name[0]+' (data scale)')
-    t=ax[0,1].text(0.06, 0.94, '(a)', transform=ax[0,1].transAxes, va='top', ha='left')
+    t=ax[0,1].text(0.06, 0.94, '(b)', transform=ax[0,1].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     ax[0,1].legend(loc='upper right')
     
     # QQ plot comparing Copula sample in data scale with GEVD fit
-    ax[0,2].text(0.5,0.5,'QQ TBC', transform=ax[0,2].transAxes, va='center', ha='center')
+    ax[0,2]=qq_plot.qq_data_vs_model(ax[0,2], x_sample_data_scale, copula_x_sample,
+                        x_fit_params, marker='^', fillstyle='none',
+                        color='darkmagenta', title='Copula sample vs '+x_fit_params.formatted_dist_name[0]+' (QQ)', 
+                        legend_pos='center left')
+    ax[0,2].set_xlabel('Copula sample in data scale')
+    ax[0,2].set_ylabel(x_fit_params.formatted_dist_name[0]+' fitted to observations')
 
     # FOR Y PARAMETER
     # Plot normalised histogram of copula sample on uniform margins
@@ -454,8 +459,12 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
     ax[1,1].legend(loc='upper right')    
     
     # QQ plot comparing Copula sample in data scale with GEVD fit
-    ax[1,2].text(0.5,0.5,'QQ TBC', transform=ax[1,2].transAxes, va='center', ha='center')
-
+    ax[1,2]=qq_plot.qq_data_vs_model(ax[1,2], y_sample_data_scale, copula_y_sample,
+                        y_fit_params, marker='^', fillstyle='none',
+                        color='darkmagenta', title='Copula sample vs '+y_fit_params.formatted_dist_name[0]+' (QQ)', 
+                        legend_pos='center left')
+    ax[1,2].set_xlabel('Copula sample in data scale')
+    ax[1,2].set_ylabel(y_fit_params.formatted_dist_name[0]+' fitted to observations')
     
     fig.tight_layout()
     
