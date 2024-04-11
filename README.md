@@ -6,6 +6,21 @@ Code to run bivariate and multivariate extreme value analysis on generic data - 
 
 **Support:** please [create an issue](https://github.com/arfogg/bi_multi_variate_eva/issues) or contact [arfogg](https://github.com/arfogg) directly. Any input on the code / issues found are greatly appreciated and will help to improve the software.
 
+## Ongoing tasks
+Code Improvement
+- [ ] Make an overarching function to run all commands
+- [ ] Make code PEP 8 compliant
+- [ ] Include a self test / unit testing on fake data
+- [ ] Sample output figure with some explanation for self test
+- [ ] Make code importable in one statement e.g. import "bi_multi_variate_eva as BiEVA"
+- [ ] Parse fit_params as a dictionary rather than a DataFrame
+
+Organisation
+- [ ] Make subfolders for Bi- and Multi- EVA
+- [ ] Create requirements.txt with packages and versions
+- [ ] Note requirements.txt in README
+- [ ] Include Dáire, Caitriona acknowledgement statement
+
 ## Table of Contents
 - [Required Packages](#required-packages)
 - [Installing the code](#installing-the-code)

@@ -93,7 +93,7 @@ def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes, x_sample,
     
    
     csize=15
-    fig, ax=plt.subplots(ncols=2, figsize=(18,7))
+    fig, ax=plt.subplots(ncols=3, figsize=(27,7))
     
     # OBSERVED EXTREMES
     h_data=ax[0].hist2d(x_extremes, y_extremes, bins=[10,10], cmap='magma', cmin=1)
@@ -126,17 +126,33 @@ def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes, x_sample,
     t_data.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     ax[1].set_title('Copula Sample (data scale)', fontsize=csize)
     
-    # Make axes limits sample as for panel0
-    ax[1].set_xlim(ax[0].get_xlim())
-    ax[1].set_ylim(ax[0].get_ylim())
+
     
     # Colourbar
     cbar_sample=fig.colorbar(h_sample[3], ax=ax[1])
     cbar_sample.set_label('Occurrence', fontsize=csize)
     cbar_sample.ax.tick_params(labelsize=csize)
     
-    # OBSERVED - COPULA
+    # Both both sets of component-wise maxima as a scatter plot
+    ax[2].plot(x_extremes, y_extremes, marker='^', color="indigo", label='Observations',
+                  fillstyle='none', linewidth=0.)
+    ax[2].plot(x_sample, y_sample, marker='*', color="darkgoldenrod", label="Copula Sample",
+                  fillstyle='none', linewidth=0.)
+    # Some decor
+    ax[2].set_xlabel(x_name, fontsize=csize)
+    ax[2].set_ylabel(y_name, fontsize=csize)  
+    for label in (ax[2].get_xticklabels() + ax[2].get_yticklabels()):
+        label.set_fontsize(csize)
+    t_data=ax[2].text(0.06, 0.94, '(c)', transform=ax[2].transAxes, fontsize=csize,  va='top', ha='left')
+    t_data.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    ax[2].set_title('Comparison', fontsize=csize)
+    ax[2].legend(fontsize=csize)
     
+    # Make axes limits sample as for panel0 for panels 1 and 2
+    ax[1].set_xlim(ax[0].get_xlim())
+    ax[1].set_ylim(ax[0].get_ylim())
+    ax[2].set_xlim(ax[0].get_xlim())
+    ax[2].set_ylim(ax[0].get_ylim())    
     
     return fig, ax
     
