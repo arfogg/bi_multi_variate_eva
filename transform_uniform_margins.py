@@ -158,19 +158,22 @@ def transform_from_uniform_margins_to_data_scale(data_unif,fit_params, plot=Fals
 
     """
     
-    data=np.full(data_unif.size,np.nan)
+    #data=np.full(data_unif.size,np.nan)
     
     if fit_params.distribution_name[0]=='genextreme':
         # For the GEVD distribution
         print('Transforming data from uniform margins to data scale for GEVD distribution')    
         
-        for i in range(data.size):
-            data[i]=( (fit_params.scale) / ( fit_params.shape_ * (-np.log(data_unif[i])) ** fit_params.shape_ ) )-(fit_params.scale/fit_params.shape_)+(fit_params.location)
+        data=genextreme.ppf(data_unif, fit_params.shape_, loc=fit_params.location, scale=fit_params.scale)
+        
+        # for i in range(data.size):
+        #     data[i]=( (fit_params.scale) / ( fit_params.shape_ * (-np.log(data_unif[i])) ** fit_params.shape_ ) )-(fit_params.scale/fit_params.shape_)+(fit_params.location)
     elif fit_params.distribution_name[0]=="gumbel_r":
         # For the Gumbel distribution
         print('Transforming data from uniform margins to data scale for Gumbel distribution')
-        for i in range(data.size):
-            data[i]=fit_params.location - (fit_params.scale * np.log(-1.0*np.log(data_unif[i])))
+        # for i in range(data.size):
+        #     data[i]=fit_params.location - (fit_params.scale * np.log(-1.0*np.log(data_unif[i])))
+        data=gumbel_r.ppf(data_unif, loc=fit_params.location, scale=fit_params.scale)
         
     
     if plot==True:
@@ -391,7 +394,7 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
     """
     
     
-    fig, ax=plt.subplots(nrows=2,ncols=3, figsize=(11,7))
+    fig, ax=plt.subplots(nrows=2,ncols=3, figsize=(16.5,10.5))
     
     # FOR X PARAMETER
     
