@@ -275,7 +275,7 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,bs_dict,
 
     """
     # Initialise figure and axes
-    fig,ax=plt.subplots(ncols=3, nrows=2, figsize=(13,8))
+    fig,ax=plt.subplots(ncols=3, nrows=2, figsize=(16.5,10.5))
         
     # Plot normalised histogram of extremes
     ax[0,0].hist(data, bins=np.linspace(np.nanmin(data),np.nanmax(data),25), density=True, rwidth=0.8, color='darkgrey', label='extremes')
@@ -292,7 +292,7 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,bs_dict,
     ax[0,0].set_xlabel(data_tag + ' in data scale ('+data_units_fm+')')    
     t=ax[0,0].text(0.06, 0.94, '(a)', transform=ax[0,0].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[0,0].set_title(fit_params.formatted_dist_name[0]+' fit assessment for '+data_tag)
+    ax[0,0].set_title(fit_params.formatted_dist_name[0]+' fit for '+data_tag)
 
     # Plot normalised histograms of different uniform margins data
     ax[0,1].hist(data_unif_cdf, bins=um_bins, density=True, rwidth=0.8, color='darkorange', label='using CDF')
@@ -304,7 +304,7 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,bs_dict,
     ax[0,1].legend(loc='upper right')
     t=ax[0,1].text(0.06, 0.94, '(b)', transform=ax[0,1].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
-    ax[0,1].set_title('Comparison of data on uniform margins')
+    ax[0,1].set_title('Data on uniform margins')
     ax[0,0].legend(loc='upper right')
     
     # QQ plot comparing the extremes and their PDF
@@ -394,7 +394,7 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
     """
     
     
-    fig, ax=plt.subplots(nrows=2,ncols=3, figsize=(16.5,10.5))
+    fig, ax = plt.subplots(nrows=2,ncols=3, figsize=(16.5,10.5))
     
     # FOR X PARAMETER
     
@@ -432,7 +432,9 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
                         legend_pos='center left')
     ax[0,2].set_xlabel('Copula sample in data scale')
     ax[0,2].set_ylabel(x_fit_params.formatted_dist_name[0]+' fitted to observations')
-
+    t=ax[0,2].text(0.06, 0.94, '(c)', transform=ax[0,2].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    
     # FOR Y PARAMETER
     # Plot normalised histogram of copula sample on uniform margins
     ax[1,0].hist(copula_y_sample, bins=um_bins, density=True, rwidth=0.8, color='darkorange', label=y_name+' copula sample\n(uniform margins)')
@@ -457,7 +459,7 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
     ax[1,1].set_xlabel('Data scale for '+y_name)
     ax[1,1].set_ylabel('Normalised Occurrence')
     ax[1,1].set_title('Copula sample vs '+y_fit_params.formatted_dist_name[0]+' (data scale)')
-    t=ax[1,1].text(0.06, 0.94, '(c)', transform=ax[1,1].transAxes, va='top', ha='left')
+    t=ax[1,1].text(0.06, 0.94, '(e)', transform=ax[1,1].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     ax[1,1].legend(loc='upper right')    
     
@@ -467,7 +469,8 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
                         color='darkmagenta', title='Copula sample vs '+y_fit_params.formatted_dist_name[0]+' (QQ)', 
                         legend_pos='center left')
     ax[1,2].set_xlabel('Copula sample in data scale')
-    ax[1,2].set_ylabel(y_fit_params.formatted_dist_name[0]+' fitted to observations')
+    t=ax[1,2].text(0.06, 0.94, '(e)', transform=ax[1,2].transAxes, va='top', ha='left')
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     
     fig.tight_layout()
     

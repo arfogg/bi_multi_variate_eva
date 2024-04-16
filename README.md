@@ -13,7 +13,8 @@ Code Improvement
 - [ ] Include a self test / unit testing on fake data
 - [ ] Sample output figure with some explanation for self test
 - [ ] Make code importable in one statement e.g. import "bi_multi_variate_eva as BiEVA"
-- [ ] Parse fit_params as a dictionary rather than a DataFrame
+- [ ] Parse fit_params as a dictionary rather than a DataFrame or create a class?
+- [ ] Implement Kendall or lambda-function plot to assess copula fit
 
 Organisation
 - [ ] Make subfolders for Bi- and Multi- EVA

@@ -32,7 +32,8 @@ def return_period_plot(data, bs_dict, fit_params, block_size, data_tag, data_uni
         periods = return periods to evaluate level at
             for confidence interval calculation
         levels = return levels across n_ci_iterations
-            of model fits
+            of model fits (shape bs_dict['periods'].size 
+            x n_ci_iterations)
         distribution_name = 'genextreme' or 'gumbel_r'
         shape_ = array of shape parameters from fitting
         location = array of location parameters from 
