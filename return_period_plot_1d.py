@@ -315,7 +315,7 @@ def return_level_bootstrapped_data(bs_data, n_bootstrap, distribution_name, bloc
     -------
     levels : np.array
         Return levels at parsed return periods. Of
-        shape return_periods.size x
+        shape return_periods.size x n_bootstrap
     shape_ : np.array
         Shape parameters for GEVD/Gumbel fits.
     location : np.array
