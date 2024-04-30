@@ -333,7 +333,7 @@ def plot_diagnostic(data,data_unif_empirical,data_unif_cdf,bs_dict,
     # Return period plot
     ax[0,2]=return_period_plot_1d.return_period_plot(data, bs_dict, fit_params, block_size, 
                                                      data_tag, data_units_fm,
-                                                     ax[0,2], csize=15)
+                                                     ax[0,2], csize=15, line_color='darkmagenta')
     
     # Some decor
     t=ax[0,2].text(0.06, 0.94, '(c)', transform=ax[0,2].transAxes, va='top', ha='left')
