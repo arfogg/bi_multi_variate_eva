@@ -266,9 +266,9 @@ def calculate_return_value_CDF(periods, fit_params, block_size):
         levels over.
     fit_params : pd.DataFrame
         Contains columns as returned by
-        fit_model_to_extremes.fit_gevd_or_gumbel..
+        fit_model_to_extremes.fit_gevd_or_gumbel.
     block_size : pd.Timedelta
-        Size chosen for block maxima selection..
+        Size chosen for block maxima selection.
 
     Returns
     -------
@@ -292,7 +292,7 @@ def calculate_return_value_CDF(periods, fit_params, block_size):
     return levels
 
 def return_level_bootstrapped_data(bs_data, n_bootstrap, distribution_name, block_size,
-                                   return_periods):
+                                   return_periods, true_fit_params):
     """
     
 
@@ -310,6 +310,11 @@ def return_level_bootstrapped_data(bs_data, n_bootstrap, distribution_name, bloc
         e.g. pd.to_timedelta("365.2425D").
     return_periods : np.array
         Return periods to calculate return levels at.
+    true_fit_params : pandas.DataFrame
+        df containing tags including distribution_name,
+        shape_, scale, location fitted to the true
+        extrema. Used as a starting guess to model
+        fitting.
 
     Returns
     -------
@@ -327,21 +332,26 @@ def return_level_bootstrapped_data(bs_data, n_bootstrap, distribution_name, bloc
 
     # For GEVD distribution
     if distribution_name == 'genextreme':
-        shape_=np.full(n_bootstrap, np.full)
-        location=np.full(n_bootstrap, np.full)
-        scale=np.full(n_bootstrap, np.full)        
+        shape_=np.full(n_bootstrap, np.nan)
+        location=np.full(n_bootstrap, np.nan)
+        scale=np.full(n_bootstrap, np.nan)        
         # Fit GEVD for each bootstrap iteration
         for i in range(n_bootstrap):
-            shape_[i],location[i],scale[i]=genextreme.fit(bs_data[:,i])      
+            shape_[i],location[i],scale[i]=genextreme.fit(bs_data[:,i],
+                                                          true_fit_params.shape_,
+                                                          loc=true_fit_params.location[0],
+                                                          scale=true_fit_params.scale[0])      
     
     # For Gumbel distribution
     elif distribution_name == 'gumbel_r':
         shape_=np.full(n_bootstrap, 0.0)
-        location=np.full(n_bootstrap, np.full)
-        scale=np.full(n_bootstrap, np.full)        
+        location=np.full(n_bootstrap, np.nan)
+        scale=np.full(n_bootstrap, np.nan)        
         # Fit Gumbel for each bootstrap iteration
         for i in range(n_bootstrap):
-            location[i],scale[i]=gumbel_r.fit(bs_data[:,i])
+            location[i],scale[i]=gumbel_r.fit(bs_data[:,i],
+                                              loc=true_fit_params.location[0],
+                                              scale=true_fit_params.scale[0])
     
     levels=np.full((return_periods.size, n_bootstrap), np.nan)
     for i in range(n_bootstrap):
