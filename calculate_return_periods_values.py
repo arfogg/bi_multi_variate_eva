@@ -26,9 +26,11 @@ def calculate_return_period(copula, sample, block_size=pd.to_timedelta("365.2425
     copula : copulas copula
         Copula that has been fit to some data
     sample : pd.DataFrame
-        Two columns with names copula.columns, containing x and y values to find the return period for.
+        Two columns with names same as copula, containing x and y values 
+        to find the return period for.
     block_size : pd.Timedelta, optional
-        Size over which block maxima have been found. The default is pd.to_timedelta("365.2425D").
+        Size over which block maxima have been found. The default 
+        is pd.to_timedelta("365.2425D").
 
     Returns
     -------
@@ -51,9 +53,19 @@ def calculate_return_period(copula, sample, block_size=pd.to_timedelta("365.2425
     
     return return_period
 
-def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_name,x_gevd_fit_params, y_gevd_fit_params,
-                                       x_label, y_label, n_samples=1000,block_size=pd.to_timedelta("365.2425D"),
-                                       contour_levels=[1/12,0.5,1.0,10.0], lower_ax_limit_contour_index=1):
+def estimate_return_period_ci(x_extrema, y_extrema,
+                              ci_percentiles=[2.5, 97.5]):
+    
+    
+
+
+def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y, 
+                                       x_name, y_name, 
+                                       x_gevd_fit_params, y_gevd_fit_params,
+                                       x_label, y_label, n_samples=1000, 
+                                       block_size=pd.to_timedelta("365.2425D"),
+                                       contour_levels=[1/12,0.5,1.0,10.0], 
+                                       lower_ax_limit_contour_index=1):
     """
     Function to plot the predicted return period as a function of
     the two input parameters.
@@ -63,13 +75,13 @@ def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_n
     copula : copulas copula
         Copula fitted to x and y extremes.
     min_x : float
-        Minimum x value that the return period will be evalutated at.
+        Minimum x value that the return period will be evaluated at.
     max_x : float
-        Maximum x value that the return period will be evalutated at.
+        Maximum x value that the return period will be evaluated at.
     min_y : float
-        Minimum y value that the return period will be evalutated at.
+        Minimum y value that the return period will be evaluated at.
     max_y : float
-        Maximum y value that the return period will be evalutated at.
+        Maximum y value that the return period will be evaluated at.
     x_name : string
         Name for x, used for pandas.DataFrame column names.
     y_name : string
@@ -134,36 +146,56 @@ def plot_return_period_as_function_x_y(copula,min_x,max_x,min_y,max_y,x_name,y_n
     shaped_return_period=return_period.reshape(mid_point_x_um.shape)
 
     # Initialise plot
-    fig,ax=plt.subplots()
+    fig,ax=plt.subplots(nrows=1, ncols=3, figsize=(21,5))
     
+    # ----- LOWER QUANTILE -----
+    
+    # Some Decor
+    ax[0].set_xlabel(x_label)
+    ax[0].set_ylabel(y_label)
+    ax[0].set_title('(a) Lower Quantile')
+    
+    
+    # ----- RETURN PERIOD -----
     # Plot return period as function of x and y in data scale
-    #pcm=ax.pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma', norm=colors.LogNorm(vmin=shaped_return_period.min(),
-    #              vmax=shaped_return_period.max()*0.10))
-    pcm=ax.pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma', norm=colors.LogNorm(vmin=np.quantile(shaped_return_period, 0.1),
+    pcm=ax[1].pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma', norm=colors.LogNorm(vmin=np.quantile(shaped_return_period, 0.1),
                   vmax=np.quantile(shaped_return_period, 0.999)))
-
+    
     # Contours
-    contours=ax.contour(mid_point_x_ds,mid_point_y_ds,shaped_return_period, contour_levels, colors='white')
+    contours=ax[1].contour(mid_point_x_ds,mid_point_y_ds,shaped_return_period, contour_levels, colors='white')
     for c in contours.collections:
         c.set_clip_on(True)
-    clabels=ax.clabel(contours, inline=True, fmt="%0.1f")
+    clabels=ax[1].clabel(contours, inline=True, fmt="%0.1f")
+
+    # Label top return level displayed
 
     # Work out x and y limits based on parsed contour index
     lower_ax_limit_contour_index=1
     xy_contour_limit=contours.allsegs[lower_ax_limit_contour_index][0]
     xlim=np.min(xy_contour_limit[:,0])*0.9
     ylim=np.min(xy_contour_limit[:,1])*0.9
-    ax.set_xlim(left=xlim)
-    ax.set_ylim(bottom=ylim)
+    ax[1].set_xlim(left=xlim)
+    ax[1].set_ylim(bottom=ylim)
     
     # Colourbar
-    cbar=fig.colorbar(pcm, ax=ax, extend='max', label='Return Period (years)')
+    cbar=fig.colorbar(pcm, ax=ax[1], extend='max', label='Return Period (years)')
     cbar.add_lines(contours)  
     
     # Some Decor
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
-     
+    ax[1].set_xlabel(x_label)
+    ax[1].set_ylabel(y_label)
+    ax[1].set_title('(b) Return Period\n'+r'($\tau_{max}$ = '+str(round(np.nanmax(shaped_return_period),2))+' years)')
+    
+    # ----- UPPER QUANTILE -----
+    
+    # Some Decor
+    ax[2].set_xlabel(x_label)
+    ax[2].set_ylabel(y_label)
+    ax[2].set_title('(c) Upper Quantile')
+         
+    
+    fig.tight_layout()
+    
     return fig, ax
 
 def plot_return_period_as_function_x_y_3d(copula,min_x,max_x,min_y,max_y,x_name,y_name,x_gevd_fit_params, y_gevd_fit_params,
