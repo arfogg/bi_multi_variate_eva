@@ -17,7 +17,7 @@ from matplotlib.transforms import Bbox
 
 import transform_uniform_margins
 
-def calculate_return_period(copula, sample, block_size=pd.to_timedelta("365.2425D")):
+def calculate_return_period(copula, sample_grid, block_size=pd.to_timedelta("365.2425D")):
     """
     Calculate the return period for a given list of sample x and y
 
@@ -25,7 +25,7 @@ def calculate_return_period(copula, sample, block_size=pd.to_timedelta("365.2425
     ----------
     copula : copulas copula
         Copula that has been fit to some data
-    sample : pd.DataFrame
+    sample_grid : pd.DataFrame
         Two columns with names same as copula, containing x and y values 
         to find the return period for.
     block_size : pd.Timedelta, optional
@@ -42,7 +42,7 @@ def calculate_return_period(copula, sample, block_size=pd.to_timedelta("365.2425
     print('Calculating the return period over parsed copula and sample')
     
     # Calculate the CDF value for each point in sample
-    CDF=copula.cumulative_distribution(sample)
+    CDF=copula.cumulative_distribution(sample_grid)
     
     # Calculate the number of extremes in a year
     n_extremes_per_year=pd.to_timedelta("365.2425D")/block_size
@@ -53,16 +53,29 @@ def calculate_return_period(copula, sample, block_size=pd.to_timedelta("365.2425
     
     return return_period
 
-def estimate_return_period_ci(x_extrema, y_extrema,
+def estimate_return_period_ci(bs_copula_arr, n_bootstrap,
+                              sample_grid, block_size=pd.to_timedelta("365.2425D"),
                               ci_percentiles=[2.5, 97.5]):
     
+    print('banana')
+    rp = np.full((sample_grid.shape[0], n_bootstrap), np.nan)
+    for i in range(n_bootstrap):
+        print('Bootstrap ',i)
+        rp[:,i] = calculate_return_period(bs_copula_arr[i], sample_grid, 
+                                          block_size=block_size)
     
+    # Can't allocate enough memory to do in one line
+    
+    ci = np.percentile(rp, ci_percentiles, axis=1)
+    return rp
 
 
 def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y, 
                                        x_name, y_name, 
                                        x_gevd_fit_params, y_gevd_fit_params,
-                                       x_label, y_label, n_samples=1000, 
+                                       x_label, y_label, 
+                                       bs_copula_arr, n_bootstrap, 
+                                       n_samples=1000,
                                        block_size=pd.to_timedelta("365.2425D"),
                                        contour_levels=[1/12,0.5,1.0,10.0], 
                                        lower_ax_limit_contour_index=1):
@@ -96,6 +109,11 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
         Name for x, used for labelling plots.
     y_label : string
         Name for y, used for labelling plots.
+    bs_copula_arr : list of copulas copulae
+        Python list of length n_bootstrap containing
+        copulae for each bootstrapped set of extrema.
+    n_bootstrap : int
+        Number of bootstrapped extrema generated.
     n_samples : int, optional
         Number of points for x and y axes. So return period is evaluated 
         across n_samples x n_samples size grid. The default is 1000.
@@ -140,6 +158,7 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     raveled_mid_point_y=mid_point_y_um.ravel()
     sample_grid=np.array([raveled_mid_point_x,raveled_mid_point_y]).T
     
+    return sample_grid
     # Calculate return period
     return_period=calculate_return_period(copula, sample_grid, block_size=block_size)
     # Reshape for mesh grid
