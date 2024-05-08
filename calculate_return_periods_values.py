@@ -67,7 +67,7 @@ def estimate_return_period_ci(bs_copula_arr, n_bootstrap,
     # Can't allocate enough memory to do in one line
     
     ci = np.percentile(rp, ci_percentiles, axis=1)
-    return rp
+    return ci
 
 
 def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y, 
@@ -78,7 +78,8 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
                                        n_samples=1000,
                                        block_size=pd.to_timedelta("365.2425D"),
                                        contour_levels=[1/12,0.5,1.0,10.0], 
-                                       lower_ax_limit_contour_index=1):
+                                       lower_ax_limit_contour_index=1,
+                                       ci_percentiles=[2.5, 97.5]):
     """
     Function to plot the predicted return period as a function of
     the two input parameters.
@@ -125,6 +126,9 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
         default is [1/12,0.5,1.0,10.0].
     lower_ax_limit_contour_index : int, optional
         Used to decide the lower axes limits for x and y. The default is 1.
+    ci_percentiles : list, optional
+        Upper and lower percentiles for the confidence interval
+        plots. The default is [2.5, 97.5].
 
     Returns
     -------
@@ -158,16 +162,24 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     raveled_mid_point_y=mid_point_y_um.ravel()
     sample_grid=np.array([raveled_mid_point_x,raveled_mid_point_y]).T
     
-    return sample_grid
+    #return sample_grid
     # Calculate return period
     return_period=calculate_return_period(copula, sample_grid, block_size=block_size)
     # Reshape for mesh grid
     shaped_return_period=return_period.reshape(mid_point_x_um.shape)
 
+    ci = estimate_return_period_ci(bs_copula_arr, n_bootstrap,
+                                  sample_grid, block_size=pd.to_timedelta("365.2425D"),
+                                  ci_percentiles=[2.5, 97.5])
+
     # Initialise plot
     fig,ax=plt.subplots(nrows=1, ncols=3, figsize=(21,5))
     
     # ----- LOWER QUANTILE -----
+    # Plot return period as function of x and y in data scale
+    lower_quantile = ci[0,:].reshape(mid_point_x_um.shape)
+    pcm=ax[0].pcolormesh(xv_ds,yv_ds,lower_quantile, cmap='plasma')    
+    
     
     # Some Decor
     ax[0].set_xlabel(x_label)
@@ -189,7 +201,7 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     # Label top return level displayed
 
     # Work out x and y limits based on parsed contour index
-    lower_ax_limit_contour_index=1
+    #lower_ax_limit_contour_index=1
     xy_contour_limit=contours.allsegs[lower_ax_limit_contour_index][0]
     xlim=np.min(xy_contour_limit[:,0])*0.9
     ylim=np.min(xy_contour_limit[:,1])*0.9
