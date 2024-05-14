@@ -51,6 +51,9 @@ def calculate_return_period(copula, sample_grid, block_size=pd.to_timedelta("365
     # See Coles 2001 textbook pages 81-82
     return_period=(1.0/n_extremes_per_year)*(1.0/(1-CDF))
     
+    if np.isfinite(np.sum(return_period)) == False:
+        breakpoint()
+    
     return return_period
 
 def estimate_return_period_ci(bs_copula_arr, n_bootstrap,
@@ -63,11 +66,22 @@ def estimate_return_period_ci(bs_copula_arr, n_bootstrap,
         print('Bootstrap ',i)
         rp[:,i] = calculate_return_period(bs_copula_arr[i], sample_grid, 
                                           block_size=block_size)
-    
-    # Can't allocate enough memory to do in one line
-    
+    print('nans in rp?',np.isnan(np.sum(rp)))
+    print('rp.shape', rp.shape)
+        #print(sample_grid.shape[0], rp[:,i].shape)
+    # Can't allocate enough memory to do in one line 
+    #   for 1000 bootstraps
+    print('HELLO USING NANPERCENTILE')
     ci = np.percentile(rp, ci_percentiles, axis=1)
-    return ci
+    print('nans in ci?',np.isnan(np.sum(ci)))
+    print('ci.shape', ci.shape)
+    
+    
+    quant = np.quantile(rp, [0.25, 0.975], axis=1)
+    print('nans in quant?',np.isnan(np.sum(quant)))
+    print('quant.shape', quant.shape)    
+    
+    return ci, rp
 
 
 def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y, 
@@ -168,24 +182,34 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     # Reshape for mesh grid
     shaped_return_period=return_period.reshape(mid_point_x_um.shape)
 
-    ci = estimate_return_period_ci(bs_copula_arr, n_bootstrap,
-                                  sample_grid, block_size=pd.to_timedelta("365.2425D"),
+    ci, rp = estimate_return_period_ci(bs_copula_arr, n_bootstrap,
+                                  sample_grid, block_size=block_size,
                                   ci_percentiles=[2.5, 97.5])
 
     # Initialise plot
     fig,ax=plt.subplots(nrows=1, ncols=3, figsize=(21,5))
     
+    return ci, rp
+   
+    
     # ----- LOWER QUANTILE -----
     # Plot return period as function of x and y in data scale
     lower_quantile = ci[0,:].reshape(mid_point_x_um.shape)
-    pcm=ax[0].pcolormesh(xv_ds,yv_ds,lower_quantile, cmap='plasma')    
+    pcm_lq=ax[0].pcolormesh(xv_ds,yv_ds,lower_quantile, cmap='plasma',
+                            norm=colors.LogNorm(vmin=np.quantile(lower_quantile, 0.1),
+                                          vmax=np.quantile(lower_quantile, 0.999)))    
     
-    
+    # Colourbar
+    print('guava')
+    cbar=fig.colorbar(pcm_lq, ax=ax[0], label='Return Period (years)')  
+    print('fig')
     # Some Decor
     ax[0].set_xlabel(x_label)
     ax[0].set_ylabel(y_label)
     ax[0].set_title('(a) Lower Quantile')
-    
+
+    print('PANEL 0 COMPLETE')
+    return
     
     # ----- RETURN PERIOD -----
     # Plot return period as function of x and y in data scale
@@ -200,13 +224,6 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
 
     # Label top return level displayed
 
-    # Work out x and y limits based on parsed contour index
-    #lower_ax_limit_contour_index=1
-    xy_contour_limit=contours.allsegs[lower_ax_limit_contour_index][0]
-    xlim=np.min(xy_contour_limit[:,0])*0.9
-    ylim=np.min(xy_contour_limit[:,1])*0.9
-    ax[1].set_xlim(left=xlim)
-    ax[1].set_ylim(bottom=ylim)
     
     # Colourbar
     cbar=fig.colorbar(pcm, ax=ax[1], extend='max', label='Return Period (years)')
@@ -216,15 +233,35 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     ax[1].set_xlabel(x_label)
     ax[1].set_ylabel(y_label)
     ax[1].set_title('(b) Return Period\n'+r'($\tau_{max}$ = '+str(round(np.nanmax(shaped_return_period),2))+' years)')
+
     
     # ----- UPPER QUANTILE -----
+    # Plot return period as function of x and y in data scale
+    upper_quantile = ci[1,:].reshape(mid_point_x_um.shape)
+    pcm_uq=ax[2].pcolormesh(xv_ds,yv_ds,upper_quantile, cmap='plasma')    
     
+    # Colourbar
+    cbar=fig.colorbar(pcm_uq, ax=ax[2], extend='max', label='Return Period (years)')  
+     
     # Some Decor
     ax[2].set_xlabel(x_label)
     ax[2].set_ylabel(y_label)
     ax[2].set_title('(c) Upper Quantile')
-         
+       
+    print('apple')
+    # Set x and y limits
+    # Work out x and y limits based on parsed contour index
+    xy_contour_limit=contours.allsegs[lower_ax_limit_contour_index][0]
+    xlim=np.min(xy_contour_limit[:,0])*0.9
+    ylim=np.min(xy_contour_limit[:,1])*0.9
+    ax[0].set_xlim(left=xlim)
+    ax[0].set_ylim(bottom=ylim)    
+    ax[1].set_xlim(left=xlim)
+    ax[1].set_ylim(bottom=ylim)
+    ax[2].set_xlim(left=xlim)
+    ax[2].set_ylim(bottom=ylim)  
     
+    print('pineapple')
     fig.tight_layout()
     
     return fig, ax
