@@ -51,8 +51,8 @@ def calculate_return_period(copula, sample_grid, block_size=pd.to_timedelta("365
     # See Coles 2001 textbook pages 81-82
     return_period=(1.0/n_extremes_per_year)*(1.0/(1-CDF))
     
-    if np.isfinite(np.sum(return_period)) == False:
-        breakpoint()
+    # if np.isfinite(np.sum(return_period)) == False:
+    #     breakpoint()
     
     return return_period
 
@@ -66,22 +66,39 @@ def estimate_return_period_ci(bs_copula_arr, n_bootstrap,
         print('Bootstrap ',i)
         rp[:,i] = calculate_return_period(bs_copula_arr[i], sample_grid, 
                                           block_size=block_size)
-    print('nans in rp?',np.isnan(np.sum(rp)))
-    print('rp.shape', rp.shape)
-        #print(sample_grid.shape[0], rp[:,i].shape)
-    # Can't allocate enough memory to do in one line 
-    #   for 1000 bootstraps
-    print('HELLO USING NANPERCENTILE')
-    ci = np.percentile(rp, ci_percentiles, axis=1)
-    print('nans in ci?',np.isnan(np.sum(ci)))
-    print('ci.shape', ci.shape)
+        
+    # Looping through each grid pixel
+    ci = np.full([sample_grid.shape[0], 2], np.nan)
+    n = np.full(sample_grid.shape[0], np.nan)
+    for j in range(sample_grid.shape[0]):
+        # First, select the Bootstraps where return_period is finite
+        #   Infinite return_period means CDF->1, which indicates
+        #   the bootstrap didn't contain the full extent of the actual
+        #   observed extrema. Hence the copula CDF was saying "out 
+        #   of bounds!" to the requested X/Y point. So, we use only
+        #   finite return periods to calculate the CI, and retain the
+        #   number of bootstraps contributing to each point.
+        rp_clean_index, = np.where(np.isfinite(rp[j,:]))
+        rp_clean = rp[j,rp_clean_index] if rp_clean_index.size > 0 else rp[j,:]
+        ci[j,:] = np.percentile(rp_clean, ci_percentiles)
+        n[j] = rp_clean.size    
+    
+    # print('nans in rp?',np.isnan(np.sum(rp)))
+    # print('rp.shape', rp.shape)
+    #     #print(sample_grid.shape[0], rp[:,i].shape)
+    # # Can't allocate enough memory to do in one line 
+    # #   for 1000 bootstraps
+    # print('HELLO USING NANPERCENTILE')
+    # ci = np.percentile(rp, ci_percentiles, axis=1)
+    # print('nans in ci?',np.isnan(np.sum(ci)))
+    # print('ci.shape', ci.shape)
     
     
-    quant = np.quantile(rp, [0.25, 0.975], axis=1)
-    print('nans in quant?',np.isnan(np.sum(quant)))
-    print('quant.shape', quant.shape)    
+    # quant = np.quantile(rp, [0.25, 0.975], axis=1)
+    # print('nans in quant?',np.isnan(np.sum(quant)))
+    # print('quant.shape', quant.shape)    
     
-    return ci, rp
+    return  rp, ci, n
 
 
 def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y, 
@@ -182,14 +199,14 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     # Reshape for mesh grid
     shaped_return_period=return_period.reshape(mid_point_x_um.shape)
 
-    ci, rp = estimate_return_period_ci(bs_copula_arr, n_bootstrap,
+    rp, ci, n = estimate_return_period_ci(bs_copula_arr, n_bootstrap,
                                   sample_grid, block_size=block_size,
                                   ci_percentiles=[2.5, 97.5])
 
     # Initialise plot
     fig,ax=plt.subplots(nrows=1, ncols=3, figsize=(21,5))
     
-    return ci, rp
+    return rp, ci, n
    
     
     # ----- LOWER QUANTILE -----
