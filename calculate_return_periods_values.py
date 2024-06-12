@@ -101,11 +101,46 @@ def estimate_return_period_ci(bs_copula_arr, n_bootstrap,
     return  rp, ci, n
 
 
+def generate_sample_grid(min_x, max_x, min_y, max_y, 
+                         x_name, y_name,
+                         n_samples=1000):
+    # Create a sample
+    sample_um=pd.DataFrame({x_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(
+                                    np.linspace(min_x,max_x,n_samples)),
+                            y_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(
+                                    np.linspace(min_y,max_y,n_samples))})
+    sample_ds=pd.DataFrame({x_name:np.linspace(min_x,max_x,n_samples),
+                            y_name:np.linspace(min_y,max_y,n_samples)})
+    
+    # Create sample grid
+    xv_um, yv_um = np.meshgrid(sample_um[x_name], sample_um[y_name])    #uniform margins
+    xv_ds, yv_ds = np.meshgrid(sample_ds[x_name], sample_ds[y_name])    #data scale
+    # mesh grid on uniform margins for calculating, in data scale
+    #   for plotting
+          
+    # Determine mid point of each pixel to calculate return
+    #   period for
+    mid_point_x_um=(xv_um[1:,1:]+xv_um[:-1,:-1])/2
+    mid_point_y_um=(yv_um[1:,1:]+yv_um[:-1,:-1])/2
+    mid_point_x_ds=(xv_ds[1:,1:]+xv_ds[:-1,:-1])/2
+    mid_point_y_ds=(yv_ds[1:,1:]+yv_ds[:-1,:-1])/2
+    
+    # Reshape
+    raveled_mid_point_x=mid_point_x_um.ravel()
+    raveled_mid_point_y=mid_point_y_um.ravel()
+    sample_grid=np.array([raveled_mid_point_x,raveled_mid_point_y]).T
+
+    return sample_grid, xv_ds, yv_ds, mid_point_x_ds, mid_point_y_ds    
+
 def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y, 
                                        x_name, y_name, 
                                        x_gevd_fit_params, y_gevd_fit_params,
                                        x_label, y_label, 
-                                       bs_copula_arr, n_bootstrap, 
+                                       bs_copula_arr, n_bootstrap,
+                                       sample_grid=None,
+                                       xv_ds=None, yv_ds=None,
+                                       mid_point_x_ds=None, mid_point_y_ds=None,
+                                       return_period=None, ci=None, n=None,
                                        n_samples=1000,
                                        block_size=pd.to_timedelta("365.2425D"),
                                        contour_levels=[1/12,0.5,1.0,10.0], 
@@ -169,52 +204,70 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
         Axes within fig.
 
     """
-    # Create a sample
-    sample_um=pd.DataFrame({x_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_x,max_x,n_samples)),
-                         y_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_y,max_y,n_samples))})
-    sample_ds=pd.DataFrame({x_name:np.linspace(min_x,max_x,n_samples),
-                                    y_name:np.linspace(min_y,max_y,n_samples)})
-
-    # Create sample grid
-    xv_um, yv_um = np.meshgrid(sample_um[x_name], sample_um[y_name])    #uniform margins
-    xv_ds, yv_ds = np.meshgrid(sample_ds[x_name], sample_ds[y_name])    #data scale
-    # mesh grid on uniform margins for calculating, in data scale
-    #   for plotting
-      
-    # Determine mid point of each pixel to calculate return
-    #   period for
-    mid_point_x_um=(xv_um[1:,1:]+xv_um[:-1,:-1])/2
-    mid_point_y_um=(yv_um[1:,1:]+yv_um[:-1,:-1])/2
-    mid_point_x_ds=(xv_ds[1:,1:]+xv_ds[:-1,:-1])/2
-    mid_point_y_ds=(yv_ds[1:,1:]+yv_ds[:-1,:-1])/2
-
-    # Reshape
-    raveled_mid_point_x=mid_point_x_um.ravel()
-    raveled_mid_point_y=mid_point_y_um.ravel()
-    sample_grid=np.array([raveled_mid_point_x,raveled_mid_point_y]).T
+    
+    # Create sample_grid etc if not parsed in
+    if (sample_grid is None) | (xv_ds is None) | (yv_ds is None) | (mid_point_x_ds is None) | (mid_point_y_ds is None):
+        # # Create a sample
+        # sample_um=pd.DataFrame({x_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_x,max_x,n_samples)),
+        #                      y_name:transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(np.linspace(min_y,max_y,n_samples))})
+        # sample_ds=pd.DataFrame({x_name:np.linspace(min_x,max_x,n_samples),
+        #                                 y_name:np.linspace(min_y,max_y,n_samples)})
+    
+        # # Create sample grid
+        # xv_um, yv_um = np.meshgrid(sample_um[x_name], sample_um[y_name])    #uniform margins
+        # xv_ds, yv_ds = np.meshgrid(sample_ds[x_name], sample_ds[y_name])    #data scale
+        # # mesh grid on uniform margins for calculating, in data scale
+        # #   for plotting
+          
+        # # Determine mid point of each pixel to calculate return
+        # #   period for
+        # mid_point_x_um=(xv_um[1:,1:]+xv_um[:-1,:-1])/2
+        # mid_point_y_um=(yv_um[1:,1:]+yv_um[:-1,:-1])/2
+        # mid_point_x_ds=(xv_ds[1:,1:]+xv_ds[:-1,:-1])/2
+        # mid_point_y_ds=(yv_ds[1:,1:]+yv_ds[:-1,:-1])/2
+    
+        # # Reshape
+        # raveled_mid_point_x=mid_point_x_um.ravel()
+        # raveled_mid_point_y=mid_point_y_um.ravel()
+        # sample_grid=np.array([raveled_mid_point_x,raveled_mid_point_y]).T
+        sample_grid, xv_ds, yv_ds, mid_point_x_ds, mid_point_y_ds = generate_sample_grid(
+                                 min_x, max_x, min_y, max_y, 
+                                 x_name, y_name,
+                                 n_samples=1000)
     
     #return sample_grid
-    # Calculate return period
-    return_period=calculate_return_period(copula, sample_grid, block_size=block_size)
-    # Reshape for mesh grid
-    shaped_return_period=return_period.reshape(mid_point_x_um.shape)
+    # Calculate return period if not parsed
+    if return_period is None:
+        return_period=calculate_return_period(copula, sample_grid, block_size=block_size)
 
-    rp, ci, n = estimate_return_period_ci(bs_copula_arr, n_bootstrap,
-                                  sample_grid, block_size=block_size,
-                                  ci_percentiles=[2.5, 97.5])
+    # Reshape for mesh grid
+    #shaped_return_period=return_period.reshape(mid_point_x_um.shape)
+    shaped_return_period=return_period.reshape(mid_point_x_ds.shape)
+
+    # Calculate confidence intervals if needed
+    if (ci is None) | (n is None):
+        rp, ci, n = estimate_return_period_ci(bs_copula_arr, n_bootstrap,
+                                      sample_grid, block_size=block_size,
+                                      ci_percentiles=ci_percentiles)
 
     # Initialise plot
     fig,ax=plt.subplots(nrows=1, ncols=3, figsize=(21,5))
     
-    return rp, ci, n
+    rp_cbar_norm = colors.LogNorm(vmin=np.quantile(shaped_return_period, 0.1),
+                                  vmax=np.quantile(shaped_return_period, 0.999))
+    #return rp, ci, n
    
     
     # ----- LOWER QUANTILE -----
     # Plot return period as function of x and y in data scale
-    lower_quantile = ci[0,:].reshape(mid_point_x_um.shape)
-    pcm_lq=ax[0].pcolormesh(xv_ds,yv_ds,lower_quantile, cmap='plasma',
-                            norm=colors.LogNorm(vmin=np.quantile(lower_quantile, 0.1),
-                                          vmax=np.quantile(lower_quantile, 0.999)))    
+    #breakpoint()
+    #lower_quantile = ci[:,0].reshape(mid_point_x_um.shape)
+    lower_quantile = ci[:,0].reshape(mid_point_x_ds.shape)
+    pcm_lq=ax[0].pcolormesh(xv_ds,yv_ds,lower_quantile, cmap='plasma', 
+                            norm = rp_cbar_norm)
+                            #)#,
+                            #norm=colors.LogNorm(vmin=np.quantile(lower_quantile, 0.1),
+                            #              vmax=np.quantile(lower_quantile, 0.999)))    
     
     # Colourbar
     print('guava')
@@ -226,12 +279,12 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     ax[0].set_title('(a) Lower Quantile')
 
     print('PANEL 0 COMPLETE')
-    return
+    #return
     
     # ----- RETURN PERIOD -----
     # Plot return period as function of x and y in data scale
-    pcm=ax[1].pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma', norm=colors.LogNorm(vmin=np.quantile(shaped_return_period, 0.1),
-                  vmax=np.quantile(shaped_return_period, 0.999)))
+    pcm=ax[1].pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma',
+                         norm = rp_cbar_norm)
     
     # Contours
     contours=ax[1].contour(mid_point_x_ds,mid_point_y_ds,shaped_return_period, contour_levels, colors='white')
@@ -254,8 +307,10 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     
     # ----- UPPER QUANTILE -----
     # Plot return period as function of x and y in data scale
-    upper_quantile = ci[1,:].reshape(mid_point_x_um.shape)
-    pcm_uq=ax[2].pcolormesh(xv_ds,yv_ds,upper_quantile, cmap='plasma')    
+    #upper_quantile = ci[:,1].reshape(mid_point_x_um.shape)
+    upper_quantile = ci[:,1].reshape(mid_point_x_ds.shape)
+    pcm_uq=ax[2].pcolormesh(xv_ds,yv_ds,upper_quantile, cmap='plasma',
+                            norm = rp_cbar_norm)    
     
     # Colourbar
     cbar=fig.colorbar(pcm_uq, ax=ax[2], extend='max', label='Return Period (years)')  
