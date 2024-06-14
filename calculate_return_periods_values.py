@@ -16,6 +16,7 @@ from matplotlib.transforms import TransformedBbox
 from matplotlib.transforms import Bbox
 
 import transform_uniform_margins
+import plotting_utils
 
 def calculate_return_period(copula, sample_grid, block_size=pd.to_timedelta("365.2425D")):
     """
@@ -146,7 +147,8 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
                                        contour_levels=[1/12,0.5,1.0,10.0],
                                        contour_colors=['white','white','white','black'],
                                        lower_ax_limit_contour_index=1,
-                                       ci_percentiles=[2.5, 97.5]):
+                                       ci_percentiles=[2.5, 97.5],
+                                       fontsize=15):
     """
     Function to plot the predicted return period as a function of
     the two input parameters.
@@ -207,6 +209,8 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     """
     
     print('Creating a 2D return period plot with confidence intervals')
+    # Adjust fontsize for all text
+    plt.rcParams['font.size'] = fontsize
     
     # Create sample_grid etc if not parsed in
     if (sample_grid is None) | (xv_ds is None) | (yv_ds is None) | (mid_point_x_ds is None) | (mid_point_y_ds is None):
@@ -229,264 +233,136 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
                                       ci_percentiles=ci_percentiles)
 
     # Initialise plot
-    fig,ax=plt.subplots(nrows=1, ncols=3, figsize=(21,5))
+    fig,ax=plt.subplots(nrows=2, ncols=2, figsize=(16,12))
    
 
 
   
     
-    # ----- LOWER QUANTILE -----
-
-    # Plot return period as function of x and y in data scale
-    lower_quantile = ci[:,0].reshape(mid_point_x_ds.shape)
-    lci_cbar_norm = colors.LogNorm(vmin=np.nanquantile(lower_quantile, 0.1),
-                                  vmax=np.nanquantile(lower_quantile, 0.999))
-    pcm_lq=ax[0].pcolormesh(xv_ds,yv_ds,lower_quantile, cmap='plasma', 
-                            norm = lci_cbar_norm)
-                            #)#,
-                            #norm=colors.LogNorm(vmin=np.quantile(lower_quantile, 0.1),
-                            #              vmax=np.quantile(lower_quantile, 0.999)))    
-    #breakpoint()
-    # Colourbar
-    cbar=fig.colorbar(pcm_lq, ax=ax[0], extend='max', label='Return Period (years)')
-    # Some Decor
-    ax[0].set_xlabel(x_label)
-    ax[0].set_ylabel(y_label)
-    ax[0].set_title('(a) Lower Quantile')
     
     # ----- RETURN PERIOD -----
     rp_cbar_norm = colors.LogNorm(vmin=np.quantile(shaped_return_period, 0.1),
                                   vmax=np.quantile(shaped_return_period, 0.999))
     # Plot return period as function of x and y in data scale
-    pcm=ax[1].pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma',
+    pcm=ax[0,0].pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma',
                          norm = rp_cbar_norm)
     
     # Contours
-    contours = ax[1].contour(mid_point_x_ds, mid_point_y_ds, shaped_return_period, contour_levels, 
+    contours = ax[0,0].contour(mid_point_x_ds, mid_point_y_ds, shaped_return_period, contour_levels, 
                            colors=contour_colors)    
     for c in contours.collections:
         c.set_clip_on(True)
-    clabels = contour_labels(contours, xpad=max_x*0.005, sides=['left', 'right'], 
+    clabels = plotting_utils.contour_labels(contours, xpad=max_x*0.005, sides=['left', 'right'], 
                              color='black', ha='left', va='center')
 
     # Colourbar
-    cbar=fig.colorbar(pcm, ax=ax[1], extend='max', label='Return Period (years)',
+    cbar=fig.colorbar(pcm, ax=ax[0,0], extend='max', label='Return Period (years)',
                       pad=0.06)
     cbar.add_lines(contours)  
     
     # Some Decor
-    ax[1].set_xlabel(x_label)
-    ax[1].set_ylabel(y_label)
-    ax[1].set_title('(b) Return Period\n'+r'($\tau_{max}$ = '+str(round(np.nanmax(shaped_return_period),2))+' years)')
+    ax[0,0].set_xlabel(x_label)
+    ax[0,0].set_ylabel(y_label)
+    ax[0,0].set_title('(a) Return Period\n'+r'($\tau_{max}$ = '+str(round(np.nanmax(shaped_return_period),2))+' years)')
 
+    # ----- LOWER QUANTILE -----
+
+    # Plot lower quantile as function of x and y in data scale
+    lower_quantile = ci[:,0].reshape(mid_point_x_ds.shape)
+    lci_cbar_norm = colors.LogNorm(vmin=np.nanquantile(lower_quantile, 0.1),
+                                  vmax=np.nanquantile(lower_quantile, 0.999))
+    pcm_lq=ax[0,1].pcolormesh(xv_ds,yv_ds,lower_quantile, cmap='magma', 
+                            norm = lci_cbar_norm)
+    # Contours
+    contours_lq = ax[0,1].contour(mid_point_x_ds, mid_point_y_ds, lower_quantile, contour_levels, 
+                           colors=contour_colors)    
+    for c in contours_lq.collections:
+        c.set_clip_on(True)
+    clabels = plotting_utils.contour_labels(contours_lq, xpad=max_x*0.005, sides=['left', 'right'], 
+                             color='black', ha='left', va='center')    
+
+    # Colourbar
+    cbar=fig.colorbar(pcm_lq, ax=ax[0,1], extend='max', label='Return Period (years)')
+    cbar.add_lines(contours_lq)
+    # Some Decor
+    ax[0,1].set_xlabel(x_label)
+    ax[0,1].set_ylabel(y_label)
+    
+    ax[0,1].set_title('(b) '+str(ci_percentiles[1]-ci_percentiles[0])+'% Confidence Interval (lower)\n'+r'($\tau_{max}$ = '+str(round(np.nanmax(lower_quantile),2))+' years)')
     
     # ----- UPPER QUANTILE -----
-    # Plot return period as function of x and y in data scale
+    # Plot upper quantile as function of x and y in data scale
     upper_quantile = ci[:,1].reshape(mid_point_x_ds.shape)
     uci_cbar_norm = colors.LogNorm(vmin=np.nanquantile(upper_quantile, 0.1),
                                   vmax=np.nanquantile(upper_quantile, 0.999))
-    pcm_uq=ax[2].pcolormesh(xv_ds,yv_ds,upper_quantile, cmap='plasma',
+    pcm_uq=ax[1,1].pcolormesh(xv_ds,yv_ds,upper_quantile, cmap='magma',
                             norm = uci_cbar_norm)    
-    
+    # Contours
+    contours_uq = ax[1,1].contour(mid_point_x_ds, mid_point_y_ds, upper_quantile, contour_levels, 
+                           colors=contour_colors)    
+    for c in contours_uq.collections:
+        c.set_clip_on(True)
+    clabels = plotting_utils.contour_labels(contours_uq, xpad=max_x*0.005, sides=['left', 'right'], 
+                             color='black', ha='left', va='center')        
     # Colourbar
-    cbar=fig.colorbar(pcm_uq, ax=ax[2], extend='max', label='Return Period (years)')  
+    cbar=fig.colorbar(pcm_uq, ax=ax[1,1], extend='max', label='Return Period (years)')
+    cbar.add_lines(contours_uq)  
      
     # Some Decor
-    ax[2].set_xlabel(x_label)
-    ax[2].set_ylabel(y_label)
-    ax[2].set_title('(c) Upper Quantile')
+    ax[1,1].set_xlabel(x_label)
+    ax[1,1].set_ylabel(y_label)
+    ax[1,1].set_title('(d) '+str(ci_percentiles[1]-ci_percentiles[0])+'% Confidence Interval (upper)\n'+r'($\tau_{max}$ = '+str(round(np.nanmax(upper_quantile),2))+' years)')
+
+
+    # ----- n -----
+    # Plot number of bootstraps contributing as function of x and y in data scale
+    number = n.reshape(mid_point_x_ds.shape)
+    pcm_n=ax[1,0].pcolormesh(xv_ds,yv_ds,number, cmap='inferno_r')    
+    
+    # # Contours
+    # contours_uq = ax[2].contour(mid_point_x_ds, mid_point_y_ds, upper_quantile, contour_levels, 
+    #                        colors=contour_colors)    
+    # for c in contours_uq.collections:
+    #     c.set_clip_on(True)
+    # clabels = plotting_utils.contour_labels(contours_uq, xpad=max_x*0.005, sides=['left', 'right'], 
+    #                          color='black', ha='left', va='center')        
+    # Colourbar
+    cbar=fig.colorbar(pcm_n, ax=ax[1,0], label='Number of bootstraps')
+    # cbar.add_lines(contours_uq)  
+     
+    # Some Decor
+    ax[1,0].set_xlabel(x_label)
+    ax[1,0].set_ylabel(y_label)
+    ax[1,0].set_title('(c) Number of contributing bootstraps\nminimum = '+str(round(np.nanmin(n),2)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # Set x and y limits
     # Work out x and y limits based on parsed contour index
     xy_contour_limit=contours.allsegs[lower_ax_limit_contour_index][0]
     xlim=np.min(xy_contour_limit[:,0])*0.9
     ylim=np.min(xy_contour_limit[:,1])*0.9
-    ax[0].set_xlim(left=xlim)
-    ax[0].set_ylim(bottom=ylim)    
-    ax[1].set_xlim(left=xlim)
-    ax[1].set_ylim(bottom=ylim)
-    ax[2].set_xlim(left=xlim)
-    ax[2].set_ylim(bottom=ylim)  
+    for i,a in np.ndenumerate(ax):
+        a.set_xlim(left=xlim)
+        a.set_ylim(bottom=ylim) 
 
     fig.tight_layout()
     #breakpoint()
     return fig, ax
 
 
-
-
-def contour_labels(contour, xpad=None, ypad=None, sides=['left', 'right'], rtol=.1, 
-                   fmt=lambda x: f'{x}', x_splits=None, y_splits=None, **text_kwargs):
-    """
-    Function for creating labels for contour lines at the 
-    edge of the subplot.
-    
-    Adapted from code by Simon J Walker see
-    https://github.com/08walkersj/Plotting_Tools/blob/dd8c63f1b349518ea448ee59411dba1715d5eac2/src/Plotting_Tools/Contour_labels.py    
-
-    Parameters
-    ----------
-    contour : matplotlib.contour
-        matplotlib contour object.
-    xpad : float/int, optional
-        shift the left or right labels. The default is 
-        None and uses .15% of absolute max of limits.
-    ypad : float/int, optional
-        shift the bottom or top labels. The default is 
-        None and uses .15% of absolute max of limits.
-    sides : list/string, optional
-        sides the labels are for. The default is 
-        ['left', 'right'].
-    rtol : int/float, optional
-        Defines how close the line must be to the axes 
-        limit for a label to be made. The default is .1, 
-        which is 10% of the limit away. Passed to 
-        numpy.isclose and atol=0.
-    fmt : definition, optional
-        format for the label string The default is 
-        lambda x: f'{x}'.
-    x_splits : list/str, optional
-        Used to define the area where labels should be 
-        found. The default is None. This is useful of 
-        the contour line intersects the axes limits in 
-        more than one place. Can define a string as 
-        positive (only look at the postive side of the 
-        x axis) or negative. Alternatively string can 
-        be provided as e.g. 'x>10' or any string with 
-        boolean design where only x is used. If multiple 
-        sides will be done to all if x_splits is a list 
-        is not provided. Use None to not activate this.
-    y_splits : TYPE, optional
-        Same as x_splits but for the y axis. The default 
-        is None.
-    **text_kwargs : dictionary
-        kwargs to be passed to matplotlib.axes.text.
-
-    Raises
-    ------
-    ArgumentError
-        Raised in an argument is not usable.
-
-    Returns
-    -------
-    list
-        list of text objects. If more than one side 
-        provided then will be a list of lists where 
-        the first list is a list of text objects 
-        corresponding to the first side provided etc.
-
-    """
-    ax = contour.axes
-    if xpad is None:
-        xpad= np.max(np.abs(ax.get_xlim()))*.015
-    if ypad is None:
-        ypad= np.max(np.abs(ax.get_ylim()))*.015
-    try:
-        if isinstance(sides, (str, np.str)):
-            sides= [sides]
-    except AttributeError:
-        if isinstance(sides, (str)):
-            sides= [sides]
-    if x_splits is None or isinstance(x_splits, (str, np.str)):
-        x_splits= [x_splits]*len(sides)
-    if y_splits is None or isinstance(y_splits, (str, np.str)):
-        y_splits= [y_splits]*len(sides)
-    labels= [[] for i in range(len(sides))]
-    for collection, level in zip(contour.collections, contour.levels):
-        if not len(collection.get_paths()):
-            continue
-        for i, (side, x_split, y_split) in enumerate(zip(sides, x_splits, y_splits)):
-            x, y= np.concatenate([path.vertices for path in collection.get_paths()], axis=0).T
-            if side=='left':
-                if y_split=='negative':
-                    x= x[y<0]
-                    y= y[y<0]
-                elif y_split=='positive':
-                    x= x[y>0]
-                    y= y[y>0]
-                elif not y_split is None and ('<' in y_split or '>' in y_split):
-                    x= x[eval(y_split)]
-                    y= y[eval(y_split)]
-                # elif not y_split is None:
-                #     raise ArgumentError(f"y_split not understood! must be either or a combination of: 'negative', 'positive' or None. Where they align with side.\n you chose {y_split}")
-                if not np.any(np.isclose(x, ax.get_xlim()[0], atol=0, rtol=rtol)):
-                    continue
-                y= y[np.isclose(x, ax.get_xlim()[0], atol=0, rtol=rtol)]
-                x= x[np.isclose(x, ax.get_xlim()[0], atol=0, rtol=rtol)]
-                y= y[np.argmin(abs(x-ax.get_xlim()[0]))]
-                x= x[np.argmin(abs(x-ax.get_xlim()[0]))]
-                x= ax.get_xlim()[0]
-                Xpad=xpad*-1
-                Ypad=0
-            elif side=='right':
-                if y_split=='negative':
-                    x= x[y<0]
-                    y= y[y<0]
-                elif y_split=='positive':
-                    x= x[y>0]
-                    y= y[y>0]
-                elif not y_split is None and ('<' in y_split or '>' in y_split):
-                    x= x[eval(y_split)]
-                    y= y[eval(y_split)]
-                # elif not y_split is None:
-                #     raise ArgumentError(f"y_split not understood! must be either or a combination of: 'negative', 'positive' or None. Where they align with side.\n you chose {y_split}")
-                if not np.any(np.isclose(x, ax.get_xlim()[1], atol=0, rtol=rtol)):
-                    continue
-                y= y[np.isclose(x, ax.get_xlim()[1], atol=0, rtol=rtol)]
-                x= x[np.isclose(x, ax.get_xlim()[1], atol=0, rtol=rtol)]
-                y= y[np.argmin(abs(x-ax.get_xlim()[1]))]
-                x= x[np.argmin(abs(x-ax.get_xlim()[1]))]
-                x= ax.get_xlim()[1]
-                Xpad=xpad
-                Ypad=0
-            elif side=='bottom':
-                if x_split=='negative':
-                    y= y[x<0]
-                    x= x[x<0]
-                elif x_split=='positive':
-                    y= y[x>0]
-                    x= x[x>0]
-                elif not x_split is None and ('<' in x_split or '>' in x_split):
-                    y= y[eval(x_split)]
-                    x= x[eval(x_split)]
-                # elif not x_split is None:
-                #     raise ArgumentError(f"x_split not understood! must be either or a combination of: 'negative', 'positive' or None. Where they align with side.\n you chose {x_split}")
-                if not np.any(np.isclose(y, ax.get_ylim()[0], atol=0, rtol=rtol)):
-                    continue
-                x= x[np.isclose(y, ax.get_ylim()[0], atol=0, rtol=rtol)]
-                y= y[np.isclose(y, ax.get_ylim()[0], atol=0, rtol=rtol)]
-                x= x[np.argmin(abs(y-ax.get_ylim()[0]))]
-                y= y[np.argmin(abs(y-ax.get_ylim()[0]))]
-                y= ax.get_ylim()[0]
-                Xpad=0
-                Ypad=ypad*-1
-            elif side=='top':
-                if x_split=='negative':
-                    y= y[x<0]
-                    x= x[x<0]
-                elif x_split=='positive':
-                    y= y[x>0]
-                    x= x[x>0]
-                elif not x_split is None and ('<' in x_split or '>' in x_split):
-                    y= y[eval(x_split)]
-                    x= x[eval(x_split)]
-                # elif not x_split is None:
-                #     raise ArgumentError(f"x_split not understood! must be either or a combination of: 'negative', 'positive' or None. Where they align with side.\n you chose {x_split}")
-                if not np.any(np.isclose(y, ax.get_ylim()[1], atol=0, rtol=rtol)):
-                    continue
-                x= x[np.isclose(y, ax.get_ylim()[1], atol=0, rtol=rtol)]
-                y= y[np.isclose(y, ax.get_ylim()[1], atol=0, rtol=rtol)]
-                x= x[np.argmin(abs(y-ax.get_ylim()[1]))]
-                y= y[np.argmin(abs(y-ax.get_ylim()[1]))]
-                y= ax.get_ylim()[1]
-                Xpad=0
-                Ypad=ypad
-            # else:
-                # raise ArgumentError(f"Invalid choice for side. Please choose either or any combination of: 'left', 'right', 'top' or 'bottom'\n you chose: {side}")
-            labels[i].append(ax.text(x+Xpad, y+Ypad, fmt(level), **text_kwargs))
-    if len(sides)==1:
-        return labels[0]
-    return labels
 
 
 
