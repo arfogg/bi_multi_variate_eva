@@ -333,7 +333,7 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     # Some Decor
     ax[1,0].set_xlabel(x_label)
     ax[1,0].set_ylabel(y_label)
-    ax[1,0].set_title('(c) Number of contributing bootstraps\nminimum = '+str(round(np.nanmin(n),2)))
+    ax[1,0].set_title('(c) Number of contributing bootstraps\nminimum = '+str(int(np.nanmin(n))))
 
 
 
