@@ -61,7 +61,7 @@ def estimate_return_period_ci(bs_copula_arr, n_bootstrap,
                               sample_grid, block_size=pd.to_timedelta("365.2425D"),
                               ci_percentiles=[2.5, 97.5]):
     
-    print('banana')
+
     rp = np.full((sample_grid.shape[0], n_bootstrap), np.nan)
     for i in range(n_bootstrap):
         print('Bootstrap ',i)
@@ -69,7 +69,8 @@ def estimate_return_period_ci(bs_copula_arr, n_bootstrap,
                                           block_size=block_size)
         
     # Looping through each grid pixel
-    ci = np.full([sample_grid.shape[0], 2], np.nan)
+    print('Calculating confidence interval')
+    ci = np.full(sample_grid.shape, np.nan)
     n = np.full(sample_grid.shape[0], np.nan)
     for j in range(sample_grid.shape[0]):
         # First, select the Bootstraps where return_period is finite
@@ -226,6 +227,8 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     # Reshape for mesh grid
     shaped_return_period=return_period.reshape(mid_point_x_ds.shape)
 
+    breakpoint()
+
     # Calculate confidence intervals if needed
     if (ci is None) | (n is None):
         rp, ci, n = estimate_return_period_ci(bs_copula_arr, n_bootstrap,
@@ -235,11 +238,6 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     # Initialise plot
     fig,ax=plt.subplots(nrows=2, ncols=2, figsize=(16,12))
    
-
-
-  
-    
-    
     # ----- RETURN PERIOD -----
     rp_cbar_norm = colors.LogNorm(vmin=np.quantile(shaped_return_period, 0.1),
                                   vmax=np.quantile(shaped_return_period, 0.999))
