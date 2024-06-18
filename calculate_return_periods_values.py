@@ -84,22 +84,7 @@ def estimate_return_period_ci(bs_copula_arr, n_bootstrap,
         rp_clean = rp[j,rp_clean_index] if rp_clean_index.size > 0 else rp[j,:]
         ci[j,:] = np.percentile(rp_clean, ci_percentiles)
         n[j] = rp_clean.size    
-    
-    # print('nans in rp?',np.isnan(np.sum(rp)))
-    # print('rp.shape', rp.shape)
-    #     #print(sample_grid.shape[0], rp[:,i].shape)
-    # # Can't allocate enough memory to do in one line 
-    # #   for 1000 bootstraps
-    # print('HELLO USING NANPERCENTILE')
-    # ci = np.percentile(rp, ci_percentiles, axis=1)
-    # print('nans in ci?',np.isnan(np.sum(ci)))
-    # print('ci.shape', ci.shape)
-    
-    
-    # quant = np.quantile(rp, [0.25, 0.975], axis=1)
-    # print('nans in quant?',np.isnan(np.sum(quant)))
-    # print('quant.shape', quant.shape)    
-    
+
     return  rp, ci, n
 
 
@@ -227,7 +212,7 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     # Reshape for mesh grid
     shaped_return_period=return_period.reshape(mid_point_x_ds.shape)
 
-    breakpoint()
+    #breakpoint()
 
     # Calculate confidence intervals if needed
     if (ci is None) | (n is None):
