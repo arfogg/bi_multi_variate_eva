@@ -54,7 +54,8 @@ def fit_copula_bivariate(x_extremes, y_extremes, x_name, y_name):
     # Format the extremes to how copulas wants them
     copula_arr=np.array([x_extremes,y_extremes]).T
     
-    # Initialise the copula - testing with gumbel (options are clayton, frank, gumbel or independence)
+    # Initialise the copula - testing with gumbel 
+    #   (options are clayton, frank, gumbel or independence)
     copula=Bivariate(copula_type='gumbel')
     
     # Fit the copula to the extremes
