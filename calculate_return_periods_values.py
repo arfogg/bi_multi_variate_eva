@@ -71,7 +71,6 @@ def estimate_return_period_ci(bs_copula_arr, n_bootstrap,
     # Looping through each grid pixel
     print('Calculating confidence interval')
     ci = np.full(sample_grid.shape, np.nan)
-    n = np.full(sample_grid.shape[0], np.nan)
     for j in range(sample_grid.shape[0]):
         # First, select the Bootstraps where return_period is finite
         #   Infinite return_period means CDF->1, which indicates
@@ -83,9 +82,8 @@ def estimate_return_period_ci(bs_copula_arr, n_bootstrap,
         rp_clean_index, = np.where(np.isfinite(rp[j,:]))
         rp_clean = rp[j,rp_clean_index] if rp_clean_index.size > 0 else rp[j,:]
         ci[j,:] = np.percentile(rp_clean, ci_percentiles)
-        n[j] = rp_clean.size    
 
-    return  rp, ci, n
+    return  rp, ci
 
 
 def generate_sample_grid(min_x, max_x, min_y, max_y, 
@@ -127,7 +125,7 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
                                        sample_grid=None,
                                        xv_ds=None, yv_ds=None,
                                        mid_point_x_ds=None, mid_point_y_ds=None,
-                                       return_period=None, ci=None, n=None,
+                                       return_period=None, ci=None,# n=None,
                                        n_samples=1000,
                                        block_size=pd.to_timedelta("365.2425D"),
                                        contour_levels=[1/12,0.5,1.0,10.0],
@@ -212,26 +210,25 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     # Reshape for mesh grid
     shaped_return_period=return_period.reshape(mid_point_x_ds.shape)
 
-    #breakpoint()
-
     # Calculate confidence intervals if needed
-    if (ci is None) | (n is None):
-        rp, ci, n = estimate_return_period_ci(bs_copula_arr, n_bootstrap,
+    if (ci is None):
+        rp, ci = estimate_return_period_ci(bs_copula_arr, n_bootstrap,
                                       sample_grid, block_size=block_size,
                                       ci_percentiles=ci_percentiles)
 
+
     # Initialise plot
-    fig,ax=plt.subplots(nrows=2, ncols=2, figsize=(16,12))
+    fig,ax=plt.subplots(nrows=1, ncols=3, figsize=(24,6))
    
     # ----- RETURN PERIOD -----
     rp_cbar_norm = colors.LogNorm(vmin=np.quantile(shaped_return_period, 0.1),
                                   vmax=np.quantile(shaped_return_period, 0.999))
     # Plot return period as function of x and y in data scale
-    pcm=ax[0,0].pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma',
+    pcm=ax[0].pcolormesh(xv_ds,yv_ds,shaped_return_period, cmap='plasma',
                          norm = rp_cbar_norm)
     
     # Contours
-    contours = ax[0,0].contour(mid_point_x_ds, mid_point_y_ds, shaped_return_period, contour_levels, 
+    contours = ax[0].contour(mid_point_x_ds, mid_point_y_ds, shaped_return_period, contour_levels, 
                            colors=contour_colors)    
     for c in contours.collections:
         c.set_clip_on(True)
@@ -239,14 +236,14 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
                              color='black', ha='left', va='center')
 
     # Colourbar
-    cbar=fig.colorbar(pcm, ax=ax[0,0], extend='max', label='Return Period (years)',
+    cbar=fig.colorbar(pcm, ax=ax[0], extend='max', label='Return Period (years)',
                       pad=0.06)
     cbar.add_lines(contours)  
     
     # Some Decor
-    ax[0,0].set_xlabel(x_label)
-    ax[0,0].set_ylabel(y_label)
-    ax[0,0].set_title('(a) Return Period\n'+r'($\tau_{max}$ = '+str(round(np.nanmax(shaped_return_period),2))+' years)')
+    ax[0].set_xlabel(x_label)
+    ax[0].set_ylabel(y_label)
+    ax[0].set_title('(a) Return Period\n'+r'($\tau_{max}$ = '+str(round(np.nanmax(shaped_return_period),2))+' years)')
 
     # ----- LOWER QUANTILE -----
 
@@ -254,10 +251,10 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
     lower_quantile = ci[:,0].reshape(mid_point_x_ds.shape)
     lci_cbar_norm = colors.LogNorm(vmin=np.nanquantile(lower_quantile, 0.1),
                                   vmax=np.nanquantile(lower_quantile, 0.999))
-    pcm_lq=ax[0,1].pcolormesh(xv_ds,yv_ds,lower_quantile, cmap='magma', 
+    pcm_lq=ax[1].pcolormesh(xv_ds,yv_ds,lower_quantile, cmap='magma', 
                             norm = lci_cbar_norm)
     # Contours
-    contours_lq = ax[0,1].contour(mid_point_x_ds, mid_point_y_ds, lower_quantile, contour_levels, 
+    contours_lq = ax[1].contour(mid_point_x_ds, mid_point_y_ds, lower_quantile, contour_levels, 
                            colors=contour_colors)    
     for c in contours_lq.collections:
         c.set_clip_on(True)
@@ -265,72 +262,36 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
                              color='black', ha='left', va='center')    
 
     # Colourbar
-    cbar=fig.colorbar(pcm_lq, ax=ax[0,1], extend='max', label='Return Period (years)')
+    cbar=fig.colorbar(pcm_lq, ax=ax[1], extend='max', label='Return Period (years)')
     cbar.add_lines(contours_lq)
     # Some Decor
-    ax[0,1].set_xlabel(x_label)
-    ax[0,1].set_ylabel(y_label)
+    ax[1].set_xlabel(x_label)
+    ax[1].set_ylabel(y_label)
     
-    ax[0,1].set_title('(b) '+str(ci_percentiles[1]-ci_percentiles[0])+'% Confidence Interval (lower)\n'+r'($\tau_{max}$ = '+str(round(np.nanmax(lower_quantile),2))+' years)')
+    ax[1].set_title('(b) '+str(ci_percentiles[1]-ci_percentiles[0])+'% Confidence Interval (lower)\n'+r'($\tau_{max}$ = '+str(round(np.nanmax(lower_quantile),2))+' years)')
     
     # ----- UPPER QUANTILE -----
     # Plot upper quantile as function of x and y in data scale
     upper_quantile = ci[:,1].reshape(mid_point_x_ds.shape)
     uci_cbar_norm = colors.LogNorm(vmin=np.nanquantile(upper_quantile, 0.1),
                                   vmax=np.nanquantile(upper_quantile, 0.999))
-    pcm_uq=ax[1,1].pcolormesh(xv_ds,yv_ds,upper_quantile, cmap='magma',
+    pcm_uq=ax[2].pcolormesh(xv_ds,yv_ds,upper_quantile, cmap='magma',
                             norm = uci_cbar_norm)    
     # Contours
-    contours_uq = ax[1,1].contour(mid_point_x_ds, mid_point_y_ds, upper_quantile, contour_levels, 
+    contours_uq = ax[2].contour(mid_point_x_ds, mid_point_y_ds, upper_quantile, contour_levels, 
                            colors=contour_colors)    
     for c in contours_uq.collections:
         c.set_clip_on(True)
     clabels = plotting_utils.contour_labels(contours_uq, xpad=max_x*0.005, sides=['left', 'right'], 
                              color='black', ha='left', va='center')        
     # Colourbar
-    cbar=fig.colorbar(pcm_uq, ax=ax[1,1], extend='max', label='Return Period (years)')
+    cbar=fig.colorbar(pcm_uq, ax=ax[2], extend='max', label='Return Period (years)')
     cbar.add_lines(contours_uq)  
      
     # Some Decor
-    ax[1,1].set_xlabel(x_label)
-    ax[1,1].set_ylabel(y_label)
-    ax[1,1].set_title('(d) '+str(ci_percentiles[1]-ci_percentiles[0])+'% Confidence Interval (upper)\n'+r'($\tau_{max}$ = '+str(round(np.nanmax(upper_quantile),2))+' years)')
-
-
-    # ----- n -----
-    # Plot number of bootstraps contributing as function of x and y in data scale
-    number = n.reshape(mid_point_x_ds.shape)
-    pcm_n=ax[1,0].pcolormesh(xv_ds,yv_ds,number, cmap='inferno_r')    
-    
-    # # Contours
-    # contours_uq = ax[2].contour(mid_point_x_ds, mid_point_y_ds, upper_quantile, contour_levels, 
-    #                        colors=contour_colors)    
-    # for c in contours_uq.collections:
-    #     c.set_clip_on(True)
-    # clabels = plotting_utils.contour_labels(contours_uq, xpad=max_x*0.005, sides=['left', 'right'], 
-    #                          color='black', ha='left', va='center')        
-    # Colourbar
-    cbar=fig.colorbar(pcm_n, ax=ax[1,0], label='Number of bootstraps')
-    # cbar.add_lines(contours_uq)  
-     
-    # Some Decor
-    ax[1,0].set_xlabel(x_label)
-    ax[1,0].set_ylabel(y_label)
-    ax[1,0].set_title('(c) Number of contributing bootstraps\nminimum = '+str(int(np.nanmin(n))))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    ax[2].set_xlabel(x_label)
+    ax[2].set_ylabel(y_label)
+    ax[2].set_title('(c) '+str(ci_percentiles[1]-ci_percentiles[0])+'% Confidence Interval (upper)\n'+r'($\tau_{max}$ = '+str(round(np.nanmax(upper_quantile),2))+' years)')
 
     # Set x and y limits
     # Work out x and y limits based on parsed contour index
@@ -342,13 +303,8 @@ def plot_return_period_as_function_x_y(copula, min_x, max_x, min_y, max_y,
         a.set_ylim(bottom=ylim) 
 
     fig.tight_layout()
-    #breakpoint()
+    
     return fig, ax
-
-
-
-
-
 
 def plot_return_period_as_function_x_y_3d(copula,min_x,max_x,min_y,max_y,x_name,y_name,x_gevd_fit_params, y_gevd_fit_params,
                                        x_label, y_label, n_samples=1000,block_size=pd.to_timedelta("365.2425D"),
