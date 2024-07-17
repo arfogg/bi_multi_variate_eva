@@ -469,7 +469,7 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
                         color='darkmagenta', title='Copula sample vs '+y_fit_params.formatted_dist_name[0]+' (QQ)', 
                         legend_pos='center left')
     ax[1,2].set_xlabel('Copula sample in data scale')
-    t=ax[1,2].text(0.06, 0.94, '(e)', transform=ax[1,2].transAxes, va='top', ha='left')
+    t=ax[1,2].text(0.06, 0.94, '(f)', transform=ax[1,2].transAxes, va='top', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
     
     fig.tight_layout()
