@@ -410,7 +410,7 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
     ax[0,0].legend(loc='upper right') 
     
     # Plot normalised histogram of copula sample in data scale
-    ax[0,1].hist(x_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label=x_name+' copula\nsample\n(data scale)')
+    ax[0,1].hist(x_sample_data_scale, bins=25, density=True, rwidth=0.8, color='darkgray', label=x_name+' copula\nsample\n(data scale)')
     
     # Overplot distribution
     model_x=np.linspace(np.nanmin(x_sample_data_scale),np.nanmax(x_sample_data_scale), 100)
@@ -448,7 +448,7 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample, x_sample_data_scale
     ax[1,0].legend(loc='upper right')
 
     # Plot normalised histogram of copula sample in data scale
-    ax[1,1].hist(y_sample_data_scale, bins=25, density=True, rwidth=0.8, color='deepskyblue', label=y_name+' copula\nsample\n(data scale)')
+    ax[1,1].hist(y_sample_data_scale, bins=25, density=True, rwidth=0.8, color='darkgray', label=y_name+' copula\nsample\n(data scale)')
     
     # Overplot distribution
     model_x=np.linspace(np.nanmin(y_sample_data_scale),np.nanmax(y_sample_data_scale), 100)
