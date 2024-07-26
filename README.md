@@ -1,4 +1,18 @@
-# bi_multi_variate_eva
+<h1 align="center">bi_multi_variate_eva</h1> 
+
+[![Downloads](https://img.shields.io/github/downloads/arfogg/bi_multi_variate_eva/total.svg)](#)
+[![GitHub release](https://img.shields.io/github/v/release/arfogg/bi_multi_variate_eva)](#)
+[![GitHub release date](https://img.shields.io/github/release-date/arfogg/bi_multi_variate_eva)](#)
+[![GitHub last commit](https://img.shields.io/github/last-commit/arfogg/bi_multi_variate_eva)](#)
+
+[![Stars](https://img.shields.io/github/stars/arfogg/bi_multi_variate_eva?style=social&color=%23FFB31A)](#)
+[![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](https://www.python.org/)
+[![License: CC0-1.0](https://img.shields.io/badge/License-CC0_1.0-lightgrey.svg)](http://creativecommons.org/publicdomain/zero/1.0/)
+[![Issues](https://img.shields.io/github/issues/arfogg/bi_multi_variate_eva.svg)](https://github.com/arfogg/bi_multi_variate_eva/issues)
+![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)
+
+
+
 
 Code to run bivariate and multivariate extreme value analysis on generic data - work in progress.
 
@@ -10,11 +24,8 @@ Code to run bivariate and multivariate extreme value analysis on generic data - 
 Code Improvement
 - [ ] Make an overarching function to run all commands
 - [ ] Make code PEP 8 compliant
-- [ ] Include a self test / unit testing on fake data
-- [ ] Sample output figure with some explanation for self test
 - [ ] Make code importable in one statement e.g. import "bi_multi_variate_eva as BiEVA"
-- [ ] Parse fit_params as a dictionary rather than a DataFrame or create a class?
-- [ ] Implement Kendall or lambda-function plot to assess copula fit
+- [ ] Create fit_params class
 
 Organisation
 - [ ] Make subfolders for Bi- and Multi- EVA
