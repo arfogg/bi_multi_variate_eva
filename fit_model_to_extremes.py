@@ -10,6 +10,8 @@ import pyextremes
 import pandas as pd
 import numpy as np
 
+from gevd_fitter import gevd_fitter
+
 def fit_gevd_or_gumbel(extremes_df,extremes_method,extremes_type,
                        df_data_tag,df_time_tag='datetime',
                        fitting_type='Emcee', block_size=None):
@@ -52,65 +54,82 @@ def fit_gevd_or_gumbel(extremes_df,extremes_method,extremes_type,
 
     """
     
-    # First, check the parsed columns exist in data
-    if set([df_data_tag,df_time_tag]).issubset(extremes_df.columns):
-        print('Fitting GEVD or Gumbel distribution')
-    else:
-        print('ERROR: fit_model_to_extremes.fit_gevd_or_gumbel')
-        print('Either '+df_data_tag+' or '+df_time_tag+' does not exist in dataframe')
-        print('Exiting...')
-        raise NameError(df_data_tag+' or '+df_time_tag+' does not exist in dataframe')
+    # # First, check the parsed columns exist in data
+    # if set([df_data_tag,df_time_tag]).issubset(extremes_df.columns):
+    #     print('Fitting GEVD or Gumbel distribution')
+    # else:
+    #     print('ERROR: fit_model_to_extremes.fit_gevd_or_gumbel')
+    #     print('Either '+df_data_tag+' or '+df_time_tag+' does not exist in dataframe')
+    #     print('Exiting...')
+    #     raise NameError(df_data_tag+' or '+df_time_tag+' does not exist in dataframe')
 
-    
-    # Convert to a pandas series with datetime as the index
-    extremes_series=pd.Series(data=extremes_df[df_data_tag].values,index=extremes_df[df_time_tag])
+    gevd_fit = gevd_fitter(extremes_df.extremes)
 
-    # Initialise the EVA class, with parsed extremes
-    print('Initialising EVA class with parsed extremes')
-    eva=pyextremes.EVA.from_extremes(extremes_series)
-    
-    # Fit a model to the extremes
-    eva.fit_model(model=fitting_type)
-    
-    # Extract fit parameters
-    fit_params=pd.DataFrame(eva.model.fit_parameters, index=[0])
-    fit_params.rename(columns={'c':'shape_', 'loc':'location'}, inplace=True)
-    
-    # Caculate confidence intervals on the fit parameters
-    if eva.distribution.name == 'gumbel_r':
-        fit_params['shape_']=0.0
-        location_quantiles=np.quantile(eva.model.trace[:,:,0].flatten(), [0.025, 0.975])
-        scale_quantiles=np.quantile(eva.model.trace[:,:,1].flatten(), [0.025, 0.975])
-        
-        fit_params['shape_lower_ci_width']=np.nan
-        fit_params['shape_upper_ci_width']=np.nan
-        
-        fit_params['location_lower_ci_width']=fit_params.location-location_quantiles[0]
-        fit_params['location_upper_ci_width']=location_quantiles[1]-fit_params.location
-        
-        fit_params['scale_lower_ci_width']=fit_params.scale-scale_quantiles[0]
-        fit_params['scale_upper_ci_width']=scale_quantiles[1]-fit_params.scale
 
-    else:
-        # Calculate the 95% confidence intervals on fit params
-        shape_quantiles=np.quantile(eva.model.trace[:,:,0].flatten(), [0.025, 0.975])
-        location_quantiles=np.quantile(eva.model.trace[:,:,1].flatten(), [0.025, 0.975])
-        scale_quantiles=np.quantile(eva.model.trace[:,:,2].flatten(), [0.025, 0.975])
-        
-        fit_params['shape_lower_ci_width']=fit_params.shape_-shape_quantiles[0]
-        fit_params['shape_upper_ci_width']=shape_quantiles[1]-fit_params.shape_
-        
-        fit_params['location_lower_ci_width']=fit_params.location-location_quantiles[0]
-        fit_params['location_upper_ci_width']=location_quantiles[1]-fit_params.location
-        
-        fit_params['scale_lower_ci_width']=fit_params.scale-scale_quantiles[0]
-        fit_params['scale_upper_ci_width']=scale_quantiles[1]-fit_params.scale
-    
-    fit_params['distribution_name']= eva.distribution.name   
-    
-    if fit_params.distribution_name[0] == 'genextreme':
-        fit_params['formatted_dist_name']='GEVD'
-    elif fit_params.distribution_name[0] == 'gumbel_r':
-        fit_params['formatted_dist_name']='Gumbel'
 
-    return fit_params
+
+
+
+
+
+
+
+
+
+    # # Convert to a pandas series with datetime as the index
+    # extremes_series=pd.Series(data=extremes_df[df_data_tag].values,index=extremes_df[df_time_tag])
+
+
+
+
+
+    # # Initialise the EVA class, with parsed extremes
+    # print('Initialising EVA class with parsed extremes')
+    # eva=pyextremes.EVA.from_extremes(extremes_series)
+    
+    # # Fit a model to the extremes
+    # eva.fit_model(model=fitting_type)
+    
+    # # Extract fit parameters
+    # fit_params=pd.DataFrame(eva.model.fit_parameters, index=[0])
+    # fit_params.rename(columns={'c':'shape_', 'loc':'location'}, inplace=True)
+    
+    # # Caculate confidence intervals on the fit parameters
+    # if eva.distribution.name == 'gumbel_r':
+    #     fit_params['shape_']=0.0
+    #     location_quantiles=np.quantile(eva.model.trace[:,:,0].flatten(), [0.025, 0.975])
+    #     scale_quantiles=np.quantile(eva.model.trace[:,:,1].flatten(), [0.025, 0.975])
+        
+    #     fit_params['shape_lower_ci_width']=np.nan
+    #     fit_params['shape_upper_ci_width']=np.nan
+        
+    #     fit_params['location_lower_ci_width']=fit_params.location-location_quantiles[0]
+    #     fit_params['location_upper_ci_width']=location_quantiles[1]-fit_params.location
+        
+    #     fit_params['scale_lower_ci_width']=fit_params.scale-scale_quantiles[0]
+    #     fit_params['scale_upper_ci_width']=scale_quantiles[1]-fit_params.scale
+
+    # else:
+    #     # Calculate the 95% confidence intervals on fit params
+    #     shape_quantiles=np.quantile(eva.model.trace[:,:,0].flatten(), [0.025, 0.975])
+    #     location_quantiles=np.quantile(eva.model.trace[:,:,1].flatten(), [0.025, 0.975])
+    #     scale_quantiles=np.quantile(eva.model.trace[:,:,2].flatten(), [0.025, 0.975])
+        
+    #     fit_params['shape_lower_ci_width']=fit_params.shape_-shape_quantiles[0]
+    #     fit_params['shape_upper_ci_width']=shape_quantiles[1]-fit_params.shape_
+        
+    #     fit_params['location_lower_ci_width']=fit_params.location-location_quantiles[0]
+    #     fit_params['location_upper_ci_width']=location_quantiles[1]-fit_params.location
+        
+    #     fit_params['scale_lower_ci_width']=fit_params.scale-scale_quantiles[0]
+    #     fit_params['scale_upper_ci_width']=scale_quantiles[1]-fit_params.scale
+    
+    # fit_params['distribution_name']= eva.distribution.name   
+    
+    # if fit_params.distribution_name[0] == 'genextreme':
+    #     fit_params['formatted_dist_name']='GEVD'
+    # elif fit_params.distribution_name[0] == 'gumbel_r':
+    #     fit_params['formatted_dist_name']='Gumbel'
+
+    # return fit_params
+    return gevd_fit
