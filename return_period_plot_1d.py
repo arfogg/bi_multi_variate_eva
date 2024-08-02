@@ -13,35 +13,41 @@ from scipy.stats import gumbel_r
 from scipy import stats
 
 
-def return_period_plot(data, bs_dict, fit_params, block_size, data_tag, data_units_fm, ax,
+def return_period_plot(gevd_fitter, bootstrap_gevd_fit, block_size, data_tag, data_units_fm, ax,
                        csize=15, line_color='darkcyan', ci_percentiles=[2.5, 97.5]):
     """
     Function to generate a return period plot.
 
     Parameters
     ----------
-    data : np.array
-        Observed extrema.
-    bs_dict : dictionary
-        Containing keys listed below.
-        n_iterations = number of bootstrap iterations
-        bs_data = bootstrapped extrema, of shape 
-            number of extrema x n_iterations
-        n_ci_iterations = number of iterations for
-            calculation of confidence interval
-        periods = return periods to evaluate level at
-            for confidence interval calculation
-        levels = return levels across n_ci_iterations
-            of model fits (shape bs_dict['periods'].size 
-            x n_ci_iterations)
-        distribution_name = 'genextreme' or 'gumbel_r'
-        shape_ = array of shape parameters from fitting
-        location = array of location parameters from 
-            fitting
-        scale = array of scale parameters from fitting
-    fit_params : pandas.DataFrame
-        df containing tags including distribution_name,
-        shape_, scale, location
+    gevd_fitter : gevd_fitter class
+        Object containing GEVD fitting information.
+    bootstrap_gevd_fit : bootstrap_gevd_fit class
+        see bootstrap_gevd_fit.py. Contains attributes
+        listed below.
+        bs_data : np.array
+            Bootstrapped extrema of dimensions n_extrema x 
+            n_ci_iterations.
+        n_extrema : int
+            Number of true extrema.
+        n_ci_iterations : int
+            Number of bootstraps.
+        distribution_name : str
+            Name of fitted distribution. Valid options
+            'genextreme' and 'gumbel_r'.
+        block_size : pd.Timedelta
+            Size of block for maxima detection.
+        periods : np.array
+            Return periods for calculated levels.
+        levels : np.array
+            Return levels per period per bootstrap. Of shape
+            periods.size x n_ci_iterations.
+        shape_ : np.array
+            Fitted shape parameter for each bootstrap.
+        location : np.array
+            Fitted location parameter for each bootstrap.
+        scale : np.array
+            Fitted scale parameter for each bootstrap.
     block_size : pd.Timedelta
         Size over which block maxima have been found,
         e.g. pd.to_timedelta("365.2425D").
@@ -71,19 +77,19 @@ def return_period_plot(data, bs_dict, fit_params, block_size, data_tag, data_uni
     print('Creating a Return Period plot')
     
     # Plot observed extremes as a function of their return period
-    empirical_return_period=calculate_return_period_empirical(data, block_size)
-    ax.plot(empirical_return_period, data, linewidth=0.0, marker='^', fillstyle='none', color='black', label='Observations')   
+    empirical_return_period=calculate_return_period_empirical(gevd_fitter.extremes, block_size)
+    ax.plot(empirical_return_period, gevd_fitter.extremes, linewidth=0.0, marker='^', fillstyle='none', color='black', label='Observations')   
     
     # Overplot the model return value as a function of period
-    model_data=np.linspace(np.nanmin(data)*0.8,np.nanmax(data)*1.2,201)
-    model_return_period=calculate_return_period_CDF(model_data, fit_params, block_size)
-    ax.plot(model_return_period, model_data, linewidth=1.5, color=line_color, label=fit_params.formatted_dist_name[0])
+    model_data=np.linspace(np.nanmin(gevd_fitter.extremes)*0.8,np.nanmax(gevd_fitter.extremes)*1.2,201)
+    model_return_period=calculate_return_period_CDF(model_data, gevd_fitter, block_size)
+    ax.plot(model_return_period, model_data, linewidth=1.5, color=line_color, label=gevd_fitter.formatted_dist_name)
     
     # Overplot confidence interval
-    plot_ind,=np.where(bs_dict['periods'] <= np.max(model_return_period))
-    percentiles=np.percentile(bs_dict['levels'][plot_ind,], ci_percentiles, axis=1).T
-    ax.plot(bs_dict['periods'][plot_ind], percentiles, color='grey', linestyle="--", linewidth=1.0)
-    ax.fill_between(bs_dict['periods'][plot_ind],percentiles[:,0],percentiles[:,1],color='grey',alpha=0.5,
+    plot_ind,=np.where(bootstrap_gevd_fit.periods <= np.max(model_return_period))
+    percentiles=np.percentile(bootstrap_gevd_fit.levels[plot_ind,], ci_percentiles, axis=1).T
+    ax.plot(bootstrap_gevd_fit.periods[plot_ind], percentiles, color='grey', linestyle="--", linewidth=1.0)
+    ax.fill_between(bootstrap_gevd_fit.periods[plot_ind],percentiles[:,0],percentiles[:,1],color='grey',alpha=0.5,
                     label=str(ci_percentiles[1]-ci_percentiles[0])+'% CI')
     
     # Some decor
@@ -95,7 +101,7 @@ def return_period_plot(data, bs_dict, fit_params, block_size, data_tag, data_uni
 
     return ax
 
-def return_period_table_ax(ax, fit_params, block_size, data_units_fm, bs_dict,
+def return_period_table_ax(ax, gevd_fitter, block_size, data_units_fm, bootstrap_gevd_fit,
                            periods=np.array([2, 5, 10, 15, 20, 25, 50, 100]), 
                            ci_percentiles=[2.5, 97.5]):
     """
@@ -106,29 +112,38 @@ def return_period_table_ax(ax, fit_params, block_size, data_units_fm, bs_dict,
     ----------
     ax : matplotlib axis object
         The axes to plot the return period table onto.
-    fit_params : pd.DataFrame
-        Contains columns as returned by
-        fit_model_to_extremes.fit_gevd_or_gumbel.
+    gevd_fitter : gevd_fitter class
+        Object containing GEVD fitting information.
     block_size : pd.Timedelta
         Size chosen for block maxima selection.
     data_units_fm : string
         Units for data to be put in axes labels etc.
-    bs_dict : dictionary
-        Containing keys listed below.
-        n_iterations = number of bootstrap iterations
-        bs_data = bootstrapped extrema, of shape 
-            number of extrema x n_iterations
-        n_ci_iterations = number of iterations for
-            calculation of confidence interval
-        periods = return periods to evaluate level at
-            for confidence interval calculation
-        levels = return levels across n_ci_iterations
-            of model fits
-        distribution_name = 'genextreme' or 'gumbel_r'
-        shape_ = array of shape parameters from fitting
-        location = array of location parameters from 
-            fitting
-        scale = array of scale parameters from fitting
+    bootstrap_gevd_fit : bootstrap_gevd_fit class
+        see bootstrap_gevd_fit.py. Contains attributes
+        listed below.
+        bs_data : np.array
+            Bootstrapped extrema of dimensions n_extrema x 
+            n_ci_iterations.
+        n_extrema : int
+            Number of true extrema.
+        n_ci_iterations : int
+            Number of bootstraps.
+        distribution_name : str
+            Name of fitted distribution. Valid options
+            'genextreme' and 'gumbel_r'.
+        block_size : pd.Timedelta
+            Size of block for maxima detection.
+        periods : np.array
+            Return periods for calculated levels.
+        levels : np.array
+            Return levels per period per bootstrap. Of shape
+            periods.size x n_ci_iterations.
+        shape_ : np.array
+            Fitted shape parameter for each bootstrap.
+        location : np.array
+            Fitted location parameter for each bootstrap.
+        scale : np.array
+            Fitted scale parameter for each bootstrap.
     periods : np.array, optional
         Array of return periods (in years) to evaluate
         the return level at. 
@@ -147,14 +162,14 @@ def return_period_table_ax(ax, fit_params, block_size, data_units_fm, bs_dict,
     print('Creating a table of return periods and values')
     
     # Calculate return level
-    levels = calculate_return_value_CDF(periods, fit_params, block_size)
+    levels = calculate_return_value_CDF(periods, gevd_fitter, block_size)
     
     # Confidence intervals
     period_ind=np.full(periods.size, np.nan)
     for i in range(period_ind.size):
-        period_ind[i],=np.where(bs_dict['periods'] == periods[i])
+        period_ind[i],=np.where(bootstrap_gevd_fit.periods == periods[i])
     period_ind=period_ind.astype('int')
-    percentiles=np.percentile(bs_dict['levels'][period_ind,], ci_percentiles, axis=1).T
+    percentiles=np.percentile(bootstrap_gevd_fit.levels[period_ind,], ci_percentiles, axis=1).T
     
     table_df=pd.DataFrame({"period\n(years)":periods,
                           "level\n("+data_units_fm+")":["%.2f" % v for v in levels],
@@ -167,9 +182,7 @@ def return_period_table_ax(ax, fit_params, block_size, data_units_fm, bs_dict,
     ax.axis('off')
     
     return ax
-    
-    
-    
+
 
 def calculate_return_period_empirical(data, block_size):
     """
@@ -210,14 +223,13 @@ def calculate_return_period_empirical(data, block_size):
     
     # Calculate exceedance probability
     exceedance_prob=1.-((rank)/(data.size + 1.0))
-    # NEED TO CHECK THE 1- WITH DÁIRE
     
     # Calculate Return Period
     tau=(1.0/(exceedance_prob*extrema_per_year))
 
     return tau
 
-def calculate_return_period_CDF(data, fit_params, block_size):
+def calculate_return_period_CDF(data, gevd_fitter, block_size):
     
     """
     Function to calculate the return period of provided
@@ -230,9 +242,8 @@ def calculate_return_period_CDF(data, fit_params, block_size):
     data : np.array
         Extrema / y values for return period
         plot.
-    fit_params : pd.DataFrame
-        Contains columns as returned by
-        fit_model_to_extremes.fit_gevd_or_gumbel.
+    gevd_fitter : gevd_fitter class
+        Object containing GEVD fitting information.
     block_size : pd.Timedelta
         Size chosen for block maxima selection.
 
@@ -246,15 +257,11 @@ def calculate_return_period_CDF(data, fit_params, block_size):
     # Calculate the number of extrema per year based on block_size
     extrema_per_year=pd.to_timedelta("365.2425D")/block_size
        
-    if fit_params.distribution_name[0]=='genextreme':
-        tau = 1.0 / ( (extrema_per_year) * (1.0 - genextreme.cdf(data, fit_params.shape_, loc=fit_params.location, scale=fit_params.scale)) )
-    
-    elif fit_params.distribution_name[0]=='gumbel_r':
-        tau = 1.0 / ( (extrema_per_year) * (1.0 - gumbel_r.cdf(data, loc=fit_params.location, scale=fit_params.scale)) )
+    tau = 1.0 / ( (extrema_per_year) * (1.0 - gevd_fitter.frozen_dist.cdf(data)) )
 
     return tau
 
-def calculate_return_value_CDF(periods, fit_params, block_size):
+def calculate_return_value_CDF(periods, gevd_fitter, block_size):
     """
     Function to calculate the return levels based on a list of
     periods and GEVD/Gumbel fit.
@@ -264,9 +271,8 @@ def calculate_return_value_CDF(periods, fit_params, block_size):
     periods : np.array
         The return periods (in years) to evaluate the return
         levels over.
-    fit_params : pd.DataFrame
-        Contains columns as returned by
-        fit_model_to_extremes.fit_gevd_or_gumbel.
+    gevd_fitter : gevd_fitter class
+        Object containing GEVD fitting information.
     block_size : pd.Timedelta
         Size chosen for block maxima selection.
 
@@ -281,13 +287,7 @@ def calculate_return_value_CDF(periods, fit_params, block_size):
     
     return_periods=periods*extrema_per_year
     
-    # !!! maths here needs to be checked with Dáire
-    if fit_params.distribution_name[0]=='genextreme':
-        levels=genextreme.ppf(1.-(1./return_periods), fit_params.shape_, 
-                              loc=fit_params.location, scale=fit_params.scale)
-    elif fit_params.distribution_name[0]=='gumbel_r':
-        levels=gumbel_r.ppf(1.-(1./return_periods), 
-                              loc=fit_params.location, scale=fit_params.scale)
+    levels = gevd_fitter.frozen_dist.ppf(1.-(1./return_periods))
     
     return levels
 
@@ -310,11 +310,8 @@ def return_level_bootstrapped_data(bs_data, n_bootstrap, distribution_name, bloc
         e.g. pd.to_timedelta("365.2425D").
     return_periods : np.array
         Return periods to calculate return levels at.
-    true_fit_params : pandas.DataFrame
-        df containing tags including distribution_name,
-        shape_, scale, location fitted to the true
-        extrema. Used as a starting guess to model
-        fitting.
+    true_fit_params : gevd_fitter class
+        See gevd_fitter.py.
 
     Returns
     -------
@@ -339,8 +336,8 @@ def return_level_bootstrapped_data(bs_data, n_bootstrap, distribution_name, bloc
         for i in range(n_bootstrap):
             shape_[i],location[i],scale[i]=genextreme.fit(bs_data[:,i],
                                                           true_fit_params.shape_,
-                                                          loc=true_fit_params.location[0],
-                                                          scale=true_fit_params.scale[0])      
+                                                          loc=true_fit_params.location,
+                                                          scale=true_fit_params.scale)      
     
     # For Gumbel distribution
     elif distribution_name == 'gumbel_r':
@@ -350,8 +347,8 @@ def return_level_bootstrapped_data(bs_data, n_bootstrap, distribution_name, bloc
         # Fit Gumbel for each bootstrap iteration
         for i in range(n_bootstrap):
             location[i],scale[i]=gumbel_r.fit(bs_data[:,i],
-                                              loc=true_fit_params.location[0],
-                                              scale=true_fit_params.scale[0])
+                                              loc=true_fit_params.location,
+                                              scale=true_fit_params.scale)
     
     levels=np.full((return_periods.size, n_bootstrap), np.nan)
     for i in range(n_bootstrap):

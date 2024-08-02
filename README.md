@@ -25,13 +25,13 @@ Code Improvement
 - [ ] Make an overarching function to run all commands
 - [ ] Make code PEP 8 compliant
 - [ ] Make code importable in one statement e.g. import "bi_multi_variate_eva as BiEVA"
-- [ ] Create fit_params class
+- [x] Create fit_params class
 
 Organisation
 - [ ] Make subfolders for Bi- and Multi- EVA
 - [ ] Create requirements.txt with packages and versions
 - [ ] Note requirements.txt in README
-- [ ] Include Dáire, Caitriona acknowledgement statement
+- [ ] Include Dáire acknowledgement statement
 
 ## Table of Contents
 - [Required Packages](#required-packages)
@@ -166,4 +166,5 @@ To be completed
 
 ## Acknowledgements
 
-ARF gratefully acknowledges the support of Irish Research Council Government of Ireland Postdoctoral Fellowship GOIPD/2022/782.
+[ARF](https://github.com/arfogg) gratefully acknowledges the support of Irish Research Council Government of Ireland Postdoctoral Fellowship GOIPD/2022/782.
+[CMJ](https://github.com/caitrionajackman), [MJR](https://github.com/mjrutala), [SCM](https://github.com/SeanMcEntee), and [SJW](https://github.com/08walkersj)) were supported by Science Foundation Ireland award 18/FRL/6199.

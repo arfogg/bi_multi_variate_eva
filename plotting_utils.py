@@ -99,8 +99,6 @@ def contour_labels(contour, xpad=None, ypad=None, sides=['left', 'right'], rtol=
                 elif not y_split is None and ('<' in y_split or '>' in y_split):
                     x= x[eval(y_split)]
                     y= y[eval(y_split)]
-                # elif not y_split is None:
-                #     raise ArgumentError(f"y_split not understood! must be either or a combination of: 'negative', 'positive' or None. Where they align with side.\n you chose {y_split}")
                 if not np.any(np.isclose(x, ax.get_xlim()[0], atol=0, rtol=rtol)):
                     continue
                 y= y[np.isclose(x, ax.get_xlim()[0], atol=0, rtol=rtol)]
@@ -120,8 +118,6 @@ def contour_labels(contour, xpad=None, ypad=None, sides=['left', 'right'], rtol=
                 elif not y_split is None and ('<' in y_split or '>' in y_split):
                     x= x[eval(y_split)]
                     y= y[eval(y_split)]
-                # elif not y_split is None:
-                #     raise ArgumentError(f"y_split not understood! must be either or a combination of: 'negative', 'positive' or None. Where they align with side.\n you chose {y_split}")
                 if not np.any(np.isclose(x, ax.get_xlim()[1], atol=0, rtol=rtol)):
                     continue
                 y= y[np.isclose(x, ax.get_xlim()[1], atol=0, rtol=rtol)]
@@ -141,8 +137,6 @@ def contour_labels(contour, xpad=None, ypad=None, sides=['left', 'right'], rtol=
                 elif not x_split is None and ('<' in x_split or '>' in x_split):
                     y= y[eval(x_split)]
                     x= x[eval(x_split)]
-                # elif not x_split is None:
-                #     raise ArgumentError(f"x_split not understood! must be either or a combination of: 'negative', 'positive' or None. Where they align with side.\n you chose {x_split}")
                 if not np.any(np.isclose(y, ax.get_ylim()[0], atol=0, rtol=rtol)):
                     continue
                 x= x[np.isclose(y, ax.get_ylim()[0], atol=0, rtol=rtol)]
@@ -162,8 +156,6 @@ def contour_labels(contour, xpad=None, ypad=None, sides=['left', 'right'], rtol=
                 elif not x_split is None and ('<' in x_split or '>' in x_split):
                     y= y[eval(x_split)]
                     x= x[eval(x_split)]
-                # elif not x_split is None:
-                #     raise ArgumentError(f"x_split not understood! must be either or a combination of: 'negative', 'positive' or None. Where they align with side.\n you chose {x_split}")
                 if not np.any(np.isclose(y, ax.get_ylim()[1], atol=0, rtol=rtol)):
                     continue
                 x= x[np.isclose(y, ax.get_ylim()[1], atol=0, rtol=rtol)]
@@ -173,8 +165,6 @@ def contour_labels(contour, xpad=None, ypad=None, sides=['left', 'right'], rtol=
                 y= ax.get_ylim()[1]
                 Xpad=0
                 Ypad=ypad
-            # else:
-                # raise ArgumentError(f"Invalid choice for side. Please choose either or any combination of: 'left', 'right', 'top' or 'bottom'\n you chose: {side}")
             labels[i].append(ax.text(x+Xpad, y+Ypad, fmt(level), **text_kwargs))
     if len(sides)==1:
         return labels[0]

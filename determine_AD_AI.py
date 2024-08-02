@@ -7,8 +7,6 @@ Created on Mon Jul  3 15:40:20 2023
 based on R code sent by Dr Daire Healy
 """
 
-import scipy
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -17,7 +15,6 @@ from matplotlib.gridspec import GridSpec
 
 import transform_uniform_margins
 
-    
 def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, bootstrap_n_iterations,
                                          x_name, y_name, x_units, y_units, csize=17,
                                          percentiles=[2.5, 97.5],
@@ -238,15 +235,4 @@ def calculate_upper_lower_lim_chi(quantiles, x_bs_um, y_bs_um, bootstrap_n_itera
         lower_q[j], upper_q[j]=np.percentile(bts_chi[j,:],percentiles)
     
     return lower_q, upper_q, bts_chi
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         
