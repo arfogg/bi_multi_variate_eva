@@ -10,9 +10,6 @@ import scipy
 import numpy as np
 import matplotlib.pyplot as plt
 
-from scipy.stats import genextreme
-from scipy.stats import gumbel_r
-
 import qq_plot
 import return_period_plot_1d
 

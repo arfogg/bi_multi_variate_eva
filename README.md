@@ -51,11 +51,9 @@ Organisation
 
 ## Required Packages
 
-scipy, numpy, matplotlib, pandas, seaborn, pyextremes, copulas
+scipy, numpy, matplotlib, pandas, copulas
 
-[Install pyextremes following instructions from its github here](https://github.com/georgebv/pyextremes)
-
-[Install copulas using pip or see documentation here](https://pypi.org/project/copulas/)
+Install copulas using pip or see documentation [here](https://pypi.org/project/copulas/)
 
 
 ## Installing the code
@@ -166,5 +164,6 @@ To be completed
 
 ## Acknowledgements
 
-[ARF](https://github.com/arfogg) gratefully acknowledges the support of Irish Research Council Government of Ireland Postdoctoral Fellowship GOIPD/2022/782.
-[CMJ](https://github.com/caitrionajackman), [MJR](https://github.com/mjrutala), [SCM](https://github.com/SeanMcEntee), and [SJW](https://github.com/08walkersj)) were supported by Science Foundation Ireland award 18/FRL/6199.
+[ARF](https://github.com/arfogg) gratefully acknowledges the support of [Irish Research Council](https://research.ie/) Government of Ireland Postdoctoral Fellowship GOIPD/2022/782.
+
+[CMJ](https://github.com/caitrionajackman), [MJR](https://github.com/mjrutala), [SCM](https://github.com/SeanMcEntee), and [SJW](https://github.com/08walkersj) were supported by [Science Foundation Ireland](https://www.sfi.ie/) award 18/FRL/6199.
