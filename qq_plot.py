@@ -11,8 +11,6 @@ https://github.com/arfogg/qq_plot
 import numpy as np
 
 from scipy.stats import linregress
-from scipy.stats import genextreme
-from scipy.stats import gumbel_r
 
 def qq_data_vs_data(x_dist, y_dist, ax, quantiles=np.linspace(0,100,101),
             marker='^', fillstyle='none', color='darkcyan', title='', 
@@ -91,7 +89,7 @@ def qq_data_vs_data(x_dist, y_dist, ax, quantiles=np.linspace(0,100,101),
         return ax
     
     
-def qq_data_vs_model(ax, extrema_ds, extrema_um_empirical, fit_params, 
+def qq_data_vs_model(ax, extrema_ds, extrema_um_empirical, gevd_fitter, 
                      marker='^', fillstyle='none', color='darkcyan', title='', 
                      legend_pos='center left'):
     """
@@ -107,9 +105,8 @@ def qq_data_vs_model(ax, extrema_ds, extrema_um_empirical, fit_params,
     extrema_um_empirical : np.array
         Detected extrema on uniform margins
         (transformed empirically).
-    fit_params : pd.DataFrame
-        Contains columns as returned by
-        fit_model_to_extremes.fit_gevd_or_gumbel.
+    gevd_fitter : gevd_fitter class
+        Object containing fitting information.
     marker : string, optional
         Markerstyle for the points, feeds into ax.plot. For 
         valid options see matplotlib.markers. The default is '^'.
@@ -132,12 +129,7 @@ def qq_data_vs_model(ax, extrema_ds, extrema_um_empirical, fit_params,
     
     print('Welcome to the Quantile-Quantile plotting program')
     
-    # !!! check this with Dáire
-    if fit_params.distribution_name[0]=='genextreme':
-        model_qq=genextreme.ppf(extrema_um_empirical,fit_params.shape_,loc=fit_params.location, scale=fit_params.scale)
-    elif fit_params.distribution_name[0]=='gumbel_r':
-        model_qq=gumbel_r.ppf(extrema_um_empirical,loc=fit_params.location, scale=fit_params.scale)
-
+    model_qq = gevd_fitter.frozen_dist.ppf(extrema_um_empirical)
 
     ax.plot(extrema_ds, model_qq, linewidth=0.0,
                marker=marker, fillstyle=fillstyle, color=color, label='QQ')

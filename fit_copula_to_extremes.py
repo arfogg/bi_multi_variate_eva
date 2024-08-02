@@ -5,11 +5,9 @@ Created on Wed Jul 19 13:40:02 2023
 @author: A R Fogg
 """
 
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from copulas.multivariate import GaussianMultivariate
 from copulas.bivariate import Bivariate
 
 def fit_copula_bivariate(x_extremes, y_extremes, x_name, y_name):
@@ -41,16 +39,7 @@ def fit_copula_bivariate(x_extremes, y_extremes, x_name, y_name):
         print('ERROR: fit_copula_to_extremes.fit_copula_bivariate')
         print('x_extremes and y_extremes must have the same length')
         raise NameError('x_extremes and y_extremes must have the same length')
-    
-    # # Format the extremes to how copulas wants them
-    # copula_df=pd.DataFrame({x_name:x_extremes,
-    #                         y_name:y_extremes})
-    
-    # # Initialise the copula - testing with GaussianMultivariate
-    # copula = GaussianMultivariate()
-    # # Fit copula to the extremes
-    # copula.fit(copula_df)
-    
+       
     # Format the extremes to how copulas wants them
     copula_arr=np.array([x_extremes,y_extremes]).T
     
@@ -91,7 +80,6 @@ def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes, x_sample,
         Axes from fig.
 
     """
-    
    
     csize=15
     fig, ax=plt.subplots(ncols=3, figsize=(27,7))
@@ -128,7 +116,6 @@ def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes, x_sample,
     ax[1].set_title('Copula Sample (data scale)', fontsize=csize)
     
 
-    
     # Colourbar
     cbar_sample=fig.colorbar(h_sample[3], ax=ax[1])
     cbar_sample.set_label('Occurrence', fontsize=csize)
