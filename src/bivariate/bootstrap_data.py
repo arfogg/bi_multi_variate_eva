@@ -8,7 +8,7 @@ Created on Mon Mar 25 15:38:34 2024
 import numpy as np
 import pandas as pd
 
-import transform_uniform_margins
+from . import transform_uniform_margins
 
 def produce_single_bootstrap_sample(data, extract_length):
     """

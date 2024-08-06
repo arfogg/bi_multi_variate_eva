@@ -10,8 +10,8 @@ import scipy
 import numpy as np
 import matplotlib.pyplot as plt
 
-import qq_plot
-import return_period_plot_1d
+from . import qq_plot
+from . import return_period_plot_1d
 
 def transform_from_data_scale_to_uniform_margins_empirically(data, plot=False):
     """
