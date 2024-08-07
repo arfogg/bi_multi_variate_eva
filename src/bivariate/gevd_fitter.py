@@ -12,7 +12,7 @@ import numpy as np
 from scipy.stats import genextreme
 from scipy.stats import gumbel_r
 
-import transform_uniform_margins
+from . import transform_uniform_margins
 
 class gevd_fitter():
     """
@@ -20,7 +20,7 @@ class gevd_fitter():
     on input extrema.
     """
     
-    def __init__(self, extremes):
+    def __init__(self, extremes, dist = None):
         """
         Initialise the gevd_fitter class. Fits a GEVD or 
         Gumbel distribution.
@@ -29,6 +29,11 @@ class gevd_fitter():
         ----------
         extremes : np.array or pd.Series
             List of extrema to fit a model to.
+        dist : string
+            Distribution to use for fitting. If == None,
+            best fitting distribution is chosen using 
+            select_distribution. Valid options 'genextreme'
+            or 'gumbel_r'.
 
         Returns
         -------
@@ -40,7 +45,7 @@ class gevd_fitter():
         self.extremes = np.array(extremes)
         
         # Fit a model
-        self.fit_model()
+        self.fit_model(dist = dist)
     
         # Convert extrema to uniform margins empirically
         self.extremes_unif_empirical = transform_uniform_margins.transform_from_data_scale_to_uniform_margins_empirically(self.extremes)
@@ -48,7 +53,7 @@ class gevd_fitter():
         # Convert extrema to uniform margins using CDF
         self.extremes_unif_CDF = transform_uniform_margins.transform_from_data_scale_to_uniform_margins_using_CDF(self.extremes, self)
 
-    def fit_model(self):
+    def fit_model(self, dist = None):
         """
         Fit a GEVD or Gumbel to the parsed
         extrema.
@@ -57,15 +62,24 @@ class gevd_fitter():
         ----------
         extremes : np.array or pd.Series
             List of extrema to fit a model to.
-
+        dist : string
+            Distribution to use for fitting. If == None,
+            best fitting distribution is chosen using 
+            select_distribution. Valid options 'genextreme'
+            or 'gumbel_r'.
+            
         Returns
         -------
         None.
 
         """
-        
-        # Select best fitting distribution
-        self.select_distribution()
+        if dist is None:
+            # Select best fitting distribution
+            self.select_distribution()
+        else:
+            # Use parsed distribution
+            self.distribution_name = dist
+            self.distribution = genextreme if dist == 'genextreme' else gumbel_r
         
         # Fit model
         fitted_params = self.distribution.fit(self.extremes)

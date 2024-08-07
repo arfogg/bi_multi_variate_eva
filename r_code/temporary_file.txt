@@ -1,3 +1,0 @@
-hello this is a temporary file made by ARF to allow git push-ing the new directory to github
-
-please delete once there's some R code in this directory

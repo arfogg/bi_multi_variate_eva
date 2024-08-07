@@ -291,8 +291,7 @@ def calculate_return_value_CDF(periods, gevd_fitter, block_size):
     
     return levels
 
-def return_level_bootstrapped_data(bs_data, n_bootstrap, distribution_name, block_size,
-                                   return_periods, true_fit_params):
+def return_level_bootstrapped_data(bootstrap_gevd_fit, n_bootstrap, return_periods):
     """
     
 
@@ -327,40 +326,53 @@ def return_level_bootstrapped_data(bs_data, n_bootstrap, distribution_name, bloc
 
     """
 
-    # For GEVD distribution
-    if distribution_name == 'genextreme':
-        shape_=np.full(n_bootstrap, np.nan)
-        location=np.full(n_bootstrap, np.nan)
-        scale=np.full(n_bootstrap, np.nan)        
-        # Fit GEVD for each bootstrap iteration
-        for i in range(n_bootstrap):
-            shape_[i],location[i],scale[i]=genextreme.fit(bs_data[:,i],
-                                                          true_fit_params.shape_,
-                                                          loc=true_fit_params.location,
-                                                          scale=true_fit_params.scale)      
+    # # For GEVD distribution
+    # if distribution_name == 'genextreme':
+    #     shape_=np.full(n_bootstrap, np.nan)
+    #     location=np.full(n_bootstrap, np.nan)
+    #     scale=np.full(n_bootstrap, np.nan)        
+    #     # Fit GEVD for each bootstrap iteration
+    #     for i in range(n_bootstrap):
+    #         shape_[i],location[i],scale[i]=genextreme.fit(bs_data[:,i],
+    #                                                       true_fit_params.shape_,
+    #                                                       loc=true_fit_params.location,
+    #                                                       scale=true_fit_params.scale)      
     
-    # For Gumbel distribution
-    elif distribution_name == 'gumbel_r':
-        shape_=np.full(n_bootstrap, 0.0)
-        location=np.full(n_bootstrap, np.nan)
-        scale=np.full(n_bootstrap, np.nan)        
-        # Fit Gumbel for each bootstrap iteration
-        for i in range(n_bootstrap):
-            location[i],scale[i]=gumbel_r.fit(bs_data[:,i],
-                                              loc=true_fit_params.location,
-                                              scale=true_fit_params.scale)
+    # # For Gumbel distribution
+    # elif distribution_name == 'gumbel_r':
+    #     shape_=np.full(n_bootstrap, 0.0)
+    #     location=np.full(n_bootstrap, np.nan)
+    #     scale=np.full(n_bootstrap, np.nan)        
+    #     # Fit Gumbel for each bootstrap iteration
+    #     for i in range(n_bootstrap):
+    #         location[i],scale[i]=gumbel_r.fit(bs_data[:,i],
+    #                                           loc=true_fit_params.location,
+    #                                           scale=true_fit_params.scale)
     
+    
+    shape_=np.full(n_bootstrap, np.nan)
+    location=np.full(n_bootstrap, np.nan)
+    scale=np.full(n_bootstrap, np.nan) 
     levels=np.full((return_periods.size, n_bootstrap), np.nan)
+    
     for i in range(n_bootstrap):
+        # Store the params
+        shape_[i] = bootstrap_gevd_fit.gevd_fitter_arr[i].shape_
+        location[i] = bootstrap_gevd_fit.gevd_fitter_arr[i].location
+        scale[i] = bootstrap_gevd_fit.gevd_fitter_arr[i].scale
+        
         # For each bootstrap iteration, calculate the return level
         #   as a function of the parsed return periods, given the 
         #   iterated fitting parameters
         levels[:,i]=calculate_return_value_CDF(return_periods, 
-                                               pd.DataFrame({'distribution_name':distribution_name,
-                                                             'shape_':shape_[i],
-                                                             'location':location[i],
-                                                             'scale':scale[i]}, index=[0]),
-                                               block_size)
+                                               bootstrap_gevd_fit.gevd_fitter_arr[i], 
+                                               bootstrap_gevd_fit.block_size)
+        # levels[:,i]=calculate_return_value_CDF(return_periods, 
+        #                                        pd.DataFrame({'distribution_name':distribution_name,
+        #                                                      'shape_':shape_[i],
+        #                                                      'location':location[i],
+        #                                                      'scale':scale[i]}, index=[0]),
+        #                                        block_size)
 
     return levels, shape_, location, scale
         

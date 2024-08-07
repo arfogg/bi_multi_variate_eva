@@ -13,7 +13,7 @@ import matplotlib as mpl
 
 from matplotlib.gridspec import GridSpec
 
-import transform_uniform_margins
+from . import transform_uniform_margins
 
 def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um, bootstrap_n_iterations,
                                          x_name, y_name, x_units, y_units, csize=17,

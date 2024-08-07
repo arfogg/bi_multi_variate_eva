@@ -11,8 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
-import transform_uniform_margins
-import plotting_utils
+from . import transform_uniform_margins
+from . import plotting_utils
 
 def calculate_return_period(copula, sample_grid, block_size=pd.to_timedelta("365.2425D")):
     """
