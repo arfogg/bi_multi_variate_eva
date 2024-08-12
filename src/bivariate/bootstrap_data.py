@@ -3,6 +3,8 @@
 Created on Mon Mar 25 15:38:34 2024
 
 @author: A R Fogg
+
+Functions to bootstrap data.
 """
 
 import numpy as np

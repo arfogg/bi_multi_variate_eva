@@ -3,6 +3,8 @@
 Created on Fri Jul 21 14:40:39 2023
 
 @author: A R Fogg
+
+Functions to calculate return periods.
 """
 
 import pandas as pd
