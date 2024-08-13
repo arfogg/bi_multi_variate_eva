@@ -3,8 +3,11 @@
 Created on Tue Aug  6 11:36:17 2024
 
 @author: A R Fogg
+
+Initialisation file which imports code.
 """
 
+# Import package code
 from .src.bivariate import bootstrap_data
 from .src.bivariate import calculate_return_periods_values
 from .src.bivariate import detect_extremes
