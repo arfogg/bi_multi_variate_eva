@@ -41,19 +41,25 @@ Python package to run bivariate and multivariate extreme value analysis on gener
 
 scipy, numpy, matplotlib, pandas, copulas
 
-Install copulas using pip or see documentation [here](https://pypi.org/project/copulas/)
-
 See [environment.yml](environment.yml) for details.
 
+Install copulas using pip or see documentation [here](https://pypi.org/project/copulas/).
 
-## Installing the code
+## Using the code
 
 Download the code:
 ```python
 git clone https://github.com/arfogg/bi_multi_variate_eva
 ```
 
+Importing:
+```python
+from bi_multi_variate_eva import *
+```
+
 ## Bivariate Analysis
+
+An example walkthrough of running the Bivariate Extreme Value Analysis on two variables x and y. For theory, a recommended text is: Coles, S. (2001). An Introduction to Statistical Modeling of Extreme Values. Springer.
 
 #### (1) Getting your data ready
 
@@ -119,8 +125,8 @@ y_bootstrap = np.full((n_extrema, N), np.nan)
 for i in range(N):
     # Select indices to get bootstraps from
     ind = np.random.choice(np.linspace(0, n_extrema-1, n_extrema), n_extrema)
-    x_bootstrap[:,i] = x_extremes_df.extreme.iloc[ind]
-    y_bootstrap[:,i] = y_extremes_df.extreme.iloc[ind]
+    x_bootstrap[:, i] = x_extremes_df.extreme.iloc[ind]
+    y_bootstrap[:, i] = y_extremes_df.extreme.iloc[ind]
 ```
 
 By then using a `bootstrap_gevd_fit` object, GEVD or Gumbel fits are estimated for each bootstrap.
@@ -146,9 +152,9 @@ Using your copula from (6), extract a sample, e.g.: `copula_sample = copula.samp
 Transform that sample back to data scale:
 ```python
 x_sample = transform_uniform_margins.\
-                transform_from_uniform_margins_to_data_scale(copula_sample[:,0], x_gevd_fit)
+                transform_from_uniform_margins_to_data_scale(copula_sample[:, 0], x_gevd_fit)
 y_sample = transform_uniform_margins.\
-                transform_from_uniform_margins_to_data_scale(copula_sample[:,0], y_gevd_fit)
+                transform_from_uniform_margins_to_data_scale(copula_sample[:, 0], y_gevd_fit)
 ```
 
 #### (9) Plot diagnostic to assess copula fit
@@ -158,7 +164,7 @@ To plot histograms of the copula in data scale (with GEVD/Gumbel fitted to obser
 For example:
 ```python
 fig_copula_1d, ax_copula_1d = transform_uniform_margins.\
-                                    plot_copula_diagnostic(copula_sample[:,0], copula_sample[:,1],
+                                    plot_copula_diagnostic(copula_sample[:, 0], copula_sample[:, 1],
                                                            x_sample, y_sample, x_gevd_fit, y_gevd_fit,
                                                            'X', 'Y')
 ```
