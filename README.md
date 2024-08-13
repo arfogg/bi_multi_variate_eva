@@ -49,7 +49,10 @@ Install copulas using pip or see documentation [here](https://pypi.org/project/c
 
 ## Installing the code
 
-First, the code must be downloaded using `git clone https://github.com/arfogg/bi_multi_variate_eva`
+Download the code:
+```python
+git clone https://github.com/arfogg/bi_multi_variate_eva
+```
 
 ## Bivariate Analysis
 
