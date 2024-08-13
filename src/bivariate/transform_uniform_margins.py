@@ -102,6 +102,10 @@ def transform_from_data_scale_to_uniform_margins_using_CDF(data, gevd_fitter,
             A formatted version of distribution name for plot labels.
         aic : float
             Akaike Information Criterion for fit.
+        fit_guess : dictionary
+            Dictionary containing guess initial parameters
+            for fitting the distribution. Keys 'c' for shape,
+            'scale', and 'loc' for location.
     plot : BOOL, optional
         If plot == True, plots the distributions of data in data
         scale and on uniform margins. The default is False.
@@ -177,6 +181,10 @@ def transform_from_uniform_margins_to_data_scale(data_unif, gevd_fitter,
             A formatted version of distribution name for plot labels.
         aic : float
             Akaike Information Criterion for fit.
+        fit_guess : dictionary
+            Dictionary containing guess initial parameters
+            for fitting the distribution. Keys 'c' for shape,
+            'scale', and 'loc' for location.
     plot : TYPE, optional
         DESCRIPTION. The default is False.
 
@@ -246,6 +254,10 @@ def plot_diagnostic(gevd_fitter, bootstrap_gevd_fit, data_tag, data_units_fm,
             A formatted version of distribution name for plot labels.
         aic : float
             Akaike Information Criterion for fit.
+        fit_guess : dictionary
+            Dictionary containing guess initial parameters
+            for fitting the distribution. Keys 'c' for shape,
+            'scale', and 'loc' for location.
     bootstrap_gevd_fit : bootstrap_gevd_fit class
         see bootstrap_gevd_fit.py. Contains attributes
         listed below.
@@ -438,6 +450,10 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample,
             A formatted version of distribution name for plot labels.
         aic : float
             Akaike Information Criterion for fit.
+        fit_guess : dictionary
+            Dictionary containing guess initial parameters
+            for fitting the distribution. Keys 'c' for shape,
+            'scale', and 'loc' for location.
     y_gevd_fitter : gevd_fitter class
         Object containing GEVD fitting information for the true data.
         Contains attributes listed below. See gevd_fitter.py for
@@ -466,6 +482,10 @@ def plot_copula_diagnostic(copula_x_sample, copula_y_sample,
             A formatted version of distribution name for plot labels.
         aic : float
             Akaike Information Criterion for fit.
+        fit_guess : dictionary
+            Dictionary containing guess initial parameters
+            for fitting the distribution. Keys 'c' for shape,
+            'scale', and 'loc' for location.
     x_name : string
         String name for x. Used for labelling plots.
     y_name : string

@@ -21,7 +21,7 @@ class gevd_fitter():
     on input extrema.
     """
 
-    def __init__(self, extremes, dist=None):
+    def __init__(self, extremes, dist=None, fit_guess={}):
         """
         Initialise the gevd_fitter class. Fits a GEVD or
         Gumbel distribution.
@@ -35,6 +35,11 @@ class gevd_fitter():
             best fitting distribution is chosen using
             select_distribution. Valid options 'genextreme'
             or 'gumbel_r'. The default is None.
+        fit_guess : dictionary, optional
+            Dictionary containing guess initial parameters
+            for fitting the distribution. Keys 'c' for shape,
+            'scale', and 'loc' for location. The default is
+            {}.
 
         Returns
         -------
@@ -46,7 +51,7 @@ class gevd_fitter():
         self.extremes = np.array(extremes)
 
         # Fit a model
-        self.fit_model(dist=dist)
+        self.fit_model(dist=dist, fit_guess=fit_guess)
 
         # Convert extrema to uniform margins empirically
         self.extremes_unif_empirical = transform_uniform_margins.\
@@ -58,7 +63,12 @@ class gevd_fitter():
             transform_from_data_scale_to_uniform_margins_using_CDF(
                 self.extremes, self)
 
-    def fit_model(self, dist=None):
+        # Define dictionary of fit parameters
+        self.params_dict = {'c': self.shape_,
+                            'scale': self.scale,
+                            'loc': self.location}
+
+    def fit_model(self, dist=None, fit_guess={}):
         """
         Fit a GEVD or Gumbel to the parsed
         extrema.
@@ -70,6 +80,11 @@ class gevd_fitter():
             best fitting distribution is chosen using
             select_distribution. Valid options 'genextreme'
             or 'gumbel_r'. The default is None.
+        fit_guess : dictionary, optional
+            Dictionary containing guess initial parameters
+            for fitting the distribution. Keys 'c' for shape,
+            'scale', and 'loc' for location. The default is
+            {}.
 
         Returns
         -------
@@ -86,8 +101,19 @@ class gevd_fitter():
                 else gumbel_r
 
         # Fit model
-        fitted_params = self.distribution.fit(self.extremes)
-
+        if fit_guess == {}:
+            fitted_params = self.distribution.fit(self.extremes)
+        else:
+            # Make a copy of fit_guess so global distribution isn't changed
+            fit_guess = fit_guess.copy()
+            args = fit_guess.pop('c')
+            # Different inputs for different distributions
+            if self.distribution_name == 'genextreme':
+                fitted_params = self.distribution.fit(self.extremes, args,
+                                                      **fit_guess)
+            elif self.distribution_name == 'gumbel_r':
+                fitted_params = self.distribution.fit(self.extremes,
+                                                      **fit_guess)
         # Freeze the fitted model
         self.frozen_dist = self.distribution(*fitted_params)
 

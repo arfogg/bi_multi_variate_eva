@@ -49,6 +49,10 @@ def return_period_plot(gevd_fitter, bootstrap_gevd_fit, block_size, data_tag,
             A formatted version of distribution name for plot labels.
         aic : float
             Akaike Information Criterion for fit.
+        fit_guess : dictionary
+            Dictionary containing guess initial parameters
+            for fitting the distribution. Keys 'c' for shape,
+            'scale', and 'loc' for location.
     bootstrap_gevd_fit : bootstrap_gevd_fit class
         see bootstrap_gevd_fit.py. Contains attributes
         listed below.
@@ -180,6 +184,10 @@ def return_period_table_ax(ax, gevd_fitter, block_size, data_units_fm,
             A formatted version of distribution name for plot labels.
         aic : float
             Akaike Information Criterion for fit.
+        fit_guess : dictionary
+            Dictionary containing guess initial parameters
+            for fitting the distribution. Keys 'c' for shape,
+            'scale', and 'loc' for location.
     block_size : pd.Timedelta
         Size chosen for block maxima selection.
     data_units_fm : string
@@ -338,6 +346,10 @@ def calculate_return_period_CDF(data, gevd_fitter, block_size):
             A formatted version of distribution name for plot labels.
         aic : float
             Akaike Information Criterion for fit.
+        fit_guess : dictionary
+            Dictionary containing guess initial parameters
+            for fitting the distribution. Keys 'c' for shape,
+            'scale', and 'loc' for location.
     block_size : pd.Timedelta
         Size chosen for block maxima selection.
 
@@ -396,6 +408,10 @@ def calculate_return_value_CDF(periods, gevd_fitter, block_size):
             A formatted version of distribution name for plot labels.
         aic : float
             Akaike Information Criterion for fit.
+        fit_guess : dictionary
+            Dictionary containing guess initial parameters
+            for fitting the distribution. Keys 'c' for shape,
+            'scale', and 'loc' for location.
     block_size : pd.Timedelta
         Size chosen for block maxima selection.
 
