@@ -11,24 +11,14 @@
 [![Issues](https://img.shields.io/github/issues/arfogg/bi_multi_variate_eva.svg)](https://github.com/arfogg/bi_multi_variate_eva/issues)
 ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)
 
-
-
-
-Code to run bivariate and multivariate extreme value analysis on generic data - work in progress.
+Python package to run bivariate and multivariate extreme value analysis on generic data - work in progress.
 
 **License:** CC0-1.0
 
 **Support:** please [create an issue](https://github.com/arfogg/bi_multi_variate_eva/issues) or contact [arfogg](https://github.com/arfogg) directly. Any input on the code / issues found are greatly appreciated and will help to improve the software.
 
 ## Ongoing tasks
-Code Improvement
-- [ ] Make an overarching function to run all commands
-- [x] Make code PEP 8 compliant
-- [x] Make code importable in one statement e.g. import "bi_multi_variate_eva as BiEVA"
-- [x] Create fit_params class
 
-Organisation
-- [x] Make subfolders for Bi- and Multi- EVA
 - [ ] Create requirements.txt with packages and versions
 - [ ] Note requirements.txt in README
 - [ ] Include Dáire acknowledgement statement
@@ -42,10 +32,11 @@ Organisation
    * [(3) Extract extrema](#3-extract-extrema) 
    * [(4) Fit a model to the extrema](#4-fit-a-model-to-the-extrema) 
    * [(5) Transform extrema data to uniform margins](#5-transform-extrema-data-to-uniform-margins) 
-   * [(6) Fit a copula to both sets of extrema](#6-fit-a-copula-to-both-sets-of-extrema) 
-   * [(7) Take a sample from the copula](#7-take-a-sample-from-the-copula) 
-   * [(8) Plot diagnostic to assess copula fit](#8-plot-diagnostic-to-assess-copula-fit) 
-   * [(9) Plot return period as a function of two variables](#9-plot-return-period-as-a-function-of-two-variables) 
+   * [(6) Bootstrapping the extrema](#6-bootstrapping-the-extrema)
+   * [(7) Fit a copula to both sets of extrema](#7-fit-a-copula-to-both-sets-of-extrema) 
+   * [(8) Take a sample from the copula](#8-take-a-sample-from-the-copula) 
+   * [(9) Plot diagnostic to assess copula fit](#9-plot-diagnostic-to-assess-copula-fit) 
+   * [(10) Plot return period as a function of two variables](#10-plot-return-period-as-a-function-of-two-variables) 
 - [Multivariate Analysis](#multivariate-analysis)
 - [Acknowledgements](#acknowledgements)
 
@@ -74,11 +65,8 @@ For example:
 
 ```python
 fig, ax_data, ax_data_unif, ax_edc, chi, chi_lower_q, chi_upper_q = \
-    determine_AD_AI.plot_extremal_dependence_coefficient(x, y,
-                                                         x_bs_um, y_bs_um,
-                                                         n_bootstrap,
-                                                         "X", "Y",
-                                                         "(units)", "(units)")
+    determine_AD_AI.plot_extremal_dependence_coefficient(x, y, x_bs_um, y_bs_um, n_bootstrap,
+                                                         "X", "Y", "(units)", "(units)")
 ```
 
 Timeseries (`np.array` or `pd.Series`) of x and y are parsed, with their bootstraps (transformed to uniform margins), number of bootstraps and strings for plot labels.
@@ -89,7 +77,7 @@ Extract extremes for both X and Y using `detect_extremes.find_joint_block_maxima
 
 For example:
 ```python
-empty_blocks, x_extreme_t, x_extreme, y_extreme_t, y_extreme =
+empty_blocks, x_extreme_t, x_extreme, y_extreme_t, y_extreme = \
             detect_extremes.find_joint_block_maxima(data_df, 'x', 'y')
 
 x_extremes_df = pd.DataFrame({'datetime':x_extreme_t, 'extreme':x_extreme})
@@ -115,9 +103,9 @@ By initialising the `gevd_fitter` class, a GEVD or Gumbel model is fit to the ex
 
 Transform x and y extrema from data scale (as it looks on the instrument) to uniform margins. This happens within the `gevd_fitter` class.
 
-You can plot a diagnostic about the transformation of one of the variables using `transform_uniform_margins.plot_diagnostic`:
+You can plot a diagnostic about the transformation of one of the variables using `transform_uniform_margins.plot_diagnostic`.
 
-#### (N) BOOTSTRAPPING
+#### (6) Bootstrapping the extrema
 
 To facilitate error calculation, we bootstrap the extrema. For each of the N bootstraps, a random selection of indices from between 0 to n_extrema-1 is chosen (where n_extrema is the number of extrema in each dataset). This set of indices is used to select points from both x and y. This ensures joint selection, so we retain the physical link between x and y.
 
@@ -140,41 +128,36 @@ x_bs_gevd_fit = bootstrap_gevd_fit(x_bootstrap, x_gevd_fit)
 y_bs_gevd_fit = bootstrap_gevd_fit(y_bootstrap, y_gevd_fit)
 ```
 
-#### (6) Fit a copula to both sets of extrema
+#### (7) Fit a copula to both sets of extrema
 
 Fit a copula to x and y extrema using `fit_copula_to_extremes.fit_copula_bivariate`.
 
 For example:
 ```python
-copula = fit_copula_to_extremes.fit_copula_bivariate(x_extremes_unif, y_extremes_unif,
-                                                    'X', 'Y')
+copula = fit_copula_to_extremes.fit_copula_bivariate(x_extremes_unif, y_extremes_unif, 'X', 'Y')
 ```
 
-#### (7) Take a sample from the copula
+#### (8) Take a sample from the copula
 
 Using your copula from (6), extract a sample, e.g.: `copula_sample = copula.sample(100)`.
 
 Transform that sample back to data scale:
 ```python
 x_sample = transform_uniform_margins.\
-                transform_from_uniform_margins_to_data_scale(copula_sample[:,0],
-                                                             x_gevd_fit)
+                transform_from_uniform_margins_to_data_scale(copula_sample[:,0], x_gevd_fit)
 y_sample = transform_uniform_margins.\
-                transform_from_uniform_margins_to_data_scale(copula_sample[:,0],
-                                                             y_gevd_fit)
+                transform_from_uniform_margins_to_data_scale(copula_sample[:,0], y_gevd_fit)
 ```
 
-#### (8) Plot diagnostic to assess copula fit
+#### (9) Plot diagnostic to assess copula fit
 
 To plot histograms of the copula in data scale (with GEVD/Gumbel fitted to observed extrema overplotted) and on uniform margins, use `transform_uniform_margins.plot_copula_diagnostic`. 
 
 For example:
 ```python
 fig_copula_1d, ax_copula_1d = transform_uniform_margins.\
-                                    plot_copula_diagnostic(copula_sample[:,0],
-                                                           copula_sample[:,1],
-                                                           x_sample, y_sample,
-                                                           x_gevd_fit, y_gevd_fit,
+                                    plot_copula_diagnostic(copula_sample[:,0], copula_sample[:,1],
+                                                           x_sample, y_sample, x_gevd_fit, y_gevd_fit,
                                                            'X', 'Y')
 ```
 
@@ -183,13 +166,11 @@ Alternatively, to compare the 2D distributions of the observed extrema and copul
 For example:
 ```python
 fig_copula_2d, ax_copula_2d = fit_copula_to_extremes.\
-                    qualitative_copula_fit_check_bivariate(x_extremes_df.extreme,
-                                                           y_extremes_df.extreme,
-                                                           x_sample, y_sample,
-                                                           'X', 'Y')
+                    qualitative_copula_fit_check_bivariate(x_extremes_df.extreme, y_extremes_df.extreme,
+                                                           x_sample, y_sample, 'X', 'Y')
 ```
 
-#### (9) Plot return period as a function of two variables
+#### (10) Plot return period as a function of two variables
 
 To plot the return period as a function of x and y, with standard contours.
 
@@ -201,8 +182,7 @@ fig_rp, ax_rp = calculate_return_periods_values.\
                                                            np.nanmax(x_extremes_df.extreme),
                                                            np.nanmin(y_extremes_df.extreme),
                                                            np.nanmax(y_extremes_df.extreme),
-                                                           'X', 'Y',
-                                                           'X (units)', 'Y (units)',
+                                                           'X', 'Y', 'X (units)', 'Y (units)',
                                                            bs_copula_arr, N)
 ```
 
