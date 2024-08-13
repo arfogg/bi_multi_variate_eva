@@ -18,9 +18,6 @@ Python package to run bivariate and multivariate extreme value analysis on gener
 **Support:** please [create an issue](https://github.com/arfogg/bi_multi_variate_eva/issues) or contact [arfogg](https://github.com/arfogg) directly. Any input on the code / issues found are greatly appreciated and will help to improve the software.
 
 ## Ongoing tasks
-
-- [ ] Create requirements.txt with packages and versions
-- [ ] Note requirements.txt in README
 - [ ] Include Dáire acknowledgement statement
 
 ## Table of Contents
@@ -45,6 +42,8 @@ Python package to run bivariate and multivariate extreme value analysis on gener
 scipy, numpy, matplotlib, pandas, copulas
 
 Install copulas using pip or see documentation [here](https://pypi.org/project/copulas/)
+
+See [environment.yml](environment.yml) for details.
 
 
 ## Installing the code
