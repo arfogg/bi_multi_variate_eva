@@ -138,7 +138,9 @@ def return_period_plot(gevd_fitter, bootstrap_gevd_fit, block_size, data_tag,
                   ' observed at least once\nper return period (' +
                   str(data_units_fm) + ')')
     ax.set_xscale('log')
-    ax.legend(loc='lower right')
+    # Best possible legend position, limiting to bottom 85% vertically to
+    #   leave room for axes labels
+    ax.legend(loc='best', bbox_to_anchor=(0, 0, 1, 0.85))
     ax.set_title('Return Period Plot')
 
     return ax

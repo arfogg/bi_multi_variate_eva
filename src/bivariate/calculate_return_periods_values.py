@@ -319,7 +319,7 @@ def plot_return_period_as_function_x_y(copula,
                                            ci_percentiles=ci_percentiles)
 
     # Initialise plot
-    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(24, 6))
+    fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(9, 21))
 
     # ----- RETURN PERIOD -----
     rp_cbar_norm = colors.LogNorm(vmin=np.quantile(shaped_return_period, 0.1),
