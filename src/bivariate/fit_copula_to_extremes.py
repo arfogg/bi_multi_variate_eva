@@ -153,3 +153,56 @@ def qualitative_copula_fit_check_bivariate(x_extremes, y_extremes,
     ax[2].set_ylim(ax[0].get_ylim())
 
     return fig, ax
+
+
+def qualitative_copula_fit_check_bivariate_scatter(x_extremes, y_extremes,
+                                                   x_sample, y_sample,
+                                                   x_name, y_name):
+    """
+    Function to do a qualitative diagnostic plot for copula fit.
+
+    Parameters
+    ----------
+    x_extremes : np.array or pd.Series
+        Observed x extremes (magnitude).
+    y_extremes : np.array or pd.Series
+        Observed y extremes (magnitude).
+    x_sample : np.array or pd.Series
+        Random copula sample (x) in data scale.
+    y_sample : np.array or pd.Series
+        Random copula sample (y) in data scale.
+    x_name : string
+        Name for x.
+    y_name : string
+        Name for y.
+
+    Returns
+    -------
+    fig : matplotlib figure
+        Diagnostic figure.
+    ax : array of matplotlib axes
+        Axes from fig.
+
+    """
+
+    fontsize = 15
+    fig, ax = plt.subplots(figsize=(10, 10))
+
+    # Both both sets of component-wise maxima as a scatter plot
+    ax.plot(x_extremes, y_extremes, marker='^', color="indigo",
+            label=str(round(len(x_extremes))) + ' Observations',
+            fillstyle='none', linewidth=0., markersize=fontsize)
+    ax.plot(x_sample, y_sample, marker='*', color="darkgoldenrod",
+            label=str(round(len(x_sample))) + " Copula Samples",
+            fillstyle='none', linewidth=0., markersize=fontsize)
+
+    # Some decor
+    ax.set_xlabel(x_name, fontsize=fontsize)
+    ax.set_ylabel(y_name, fontsize=fontsize)
+    for label in (ax.get_xticklabels() + ax.get_yticklabels()):
+        label.set_fontsize(fontsize)
+
+    ax.set_title('Component-wise maxima', fontsize=fontsize)
+    ax.legend(fontsize=fontsize)
+
+    return fig, ax
