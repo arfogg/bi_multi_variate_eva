@@ -25,9 +25,8 @@ def calculate_return_period(copula, sample_grid,
     ----------
     copula : copulas copula
         Copula that has been fit to some data
-    sample_grid : pd.DataFrame
-        Two columns with names same as copula, containing x and y values
-        to find the return period for.
+    sample_grid : np.array
+        Grid containing x and y values to find the return period for.
     block_size : pd.Timedelta, optional
         Size over which block maxima have been found. The default
         is pd.to_timedelta("365.2425D").
