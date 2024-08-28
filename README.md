@@ -1,4 +1,4 @@
-<h1 align="center">bi_multi_variate_eva</h1> 
+<h1 align="center">:bar_chart: bi_multi_variate_eva :chart_with_upwards_trend:</h1> 
 
 [![Downloads](https://img.shields.io/github/downloads/arfogg/bi_multi_variate_eva/total.svg)](#)
 [![GitHub release](https://img.shields.io/github/v/release/arfogg/bi_multi_variate_eva)](#)
@@ -16,9 +16,6 @@ Python package to run bivariate and multivariate extreme value analysis on gener
 **License:** CC0-1.0
 
 **Support:** please [create an issue](https://github.com/arfogg/bi_multi_variate_eva/issues) or contact [arfogg](https://github.com/arfogg) directly. Any input on the code / issues found are greatly appreciated and will help to improve the software.
-
-## Ongoing tasks
-- [ ] Include Dáire acknowledgement statement
 
 ## Table of Contents
 - [Required Packages](#required-packages)

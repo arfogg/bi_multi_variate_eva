@@ -21,7 +21,8 @@ class gevd_fitter():
     on input extrema.
     """
 
-    def __init__(self, extremes, dist=None, fit_guess={}):
+    def __init__(self, extremes, dist=None, fit_guess={},
+                 shape_threshold=0.005):
         """
         Initialise the gevd_fitter class. Fits a GEVD or
         Gumbel distribution.
@@ -40,6 +41,10 @@ class gevd_fitter():
             for fitting the distribution. Keys 'c' for shape,
             'scale', and 'loc' for location. The default is
             {}.
+        shape_threshold : float, optional
+            A genextreme distribution is fitted. If the absolute value of
+            the resulting shape parameter is less than or equal to this value,
+            a gumbel_r distribution is returned instead.
 
         Returns
         -------
@@ -68,7 +73,7 @@ class gevd_fitter():
                             'scale': self.scale,
                             'loc': self.location}
 
-    def fit_model(self, dist=None, fit_guess={}):
+    def fit_model(self, dist=None, fit_guess={}, shape_threshold=0.005):
         """
         Fit a GEVD or Gumbel to the parsed
         extrema.
@@ -83,8 +88,11 @@ class gevd_fitter():
         fit_guess : dictionary, optional
             Dictionary containing guess initial parameters
             for fitting the distribution. Keys 'c' for shape,
-            'scale', and 'loc' for location. The default is
-            {}.
+            'scale', and 'loc' for location. The default is {}.
+        shape_threshold : float, optional
+            A genextreme distribution is fitted. If the absolute value of
+            the resulting shape parameter is less than or equal to this value,
+            a gumbel_r distribution is returned instead.
 
         Returns
         -------
@@ -114,6 +122,7 @@ class gevd_fitter():
             elif self.distribution_name == 'gumbel_r':
                 fitted_params = self.distribution.fit(self.extremes,
                                                       **fit_guess)
+
         # Freeze the fitted model
         self.frozen_dist = self.distribution(*fitted_params)
 
@@ -133,14 +142,17 @@ class gevd_fitter():
         # Assign AIC
         self.aic = self.akaike_info_criterion(self.extremes, self.frozen_dist)
 
-    def select_distribution(self):
+    def select_distribution(self, shape_threshold=0.005):
         """
         Choose the best fitting distribution
         based on which has the lowest AIC.
 
         Parameters
         ----------
-        None.
+        shape_threshold : float, optional
+            A genextreme distribution is fitted. If the absolute value of
+            the resulting shape parameter is less than or equal to this value,
+            a gumbel_r distribution is returned instead.
 
         Returns
         -------
@@ -148,28 +160,18 @@ class gevd_fitter():
 
         """
 
-        # Define loop lists
-        distributions = [genextreme, gumbel_r]
-        names = ['genextreme', 'gumbel_r']
-        aic_arr = []
+        # Fit GEVD, and see what the shape value is
+        shape_, location, scale = genextreme.fit(self.extremes)
 
-        for dist in distributions:
-            # Fit the model
-            params = dist.fit(self.extremes)
-
-            # Freeze distribution
-            frozen = dist(*params)
-
-            # Calculate AIC
-            aic = self.akaike_info_criterion(self.extremes, frozen)
-            aic_arr.append(aic)
-
-        # Find model with lowest AIC
-        min_index, = np.where(aic_arr == np.min(aic_arr))
-
-        # Assign the selected distribution to the class
-        self.distribution_name = names[min_index[0]]
-        self.distribution = distributions[min_index[0]]
+        # Assess the magnitude of the shape parameter
+        if abs(shape_) > shape_threshold:
+            # Shape is large enough, genextreme is returned
+            self.distribution_name = 'genextreme'
+            self.distribution = genextreme
+        else:
+            # Shape is small, so a Gumbel is likely a better fit
+            self.distribution_name = 'gumbel_r'
+            self.distribution = gumbel_r
 
     def akaike_info_criterion(self, data, model):
         """

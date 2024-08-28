@@ -160,7 +160,7 @@ def plot_extremal_dependence_coefficient(x_data, y_data, x_bs_um, y_bs_um,
 
     # Formatting
     ax_edc.set_xlabel("Quantiles", fontsize=fontsize)
-    ax_edc.set_ylabel("Extremal Dependence Coefficient, $\chi$",
+    ax_edc.set_ylabel("Extremal Dependence Coefficient, $\chi_{u}$",
                       fontsize=fontsize)
     for label in (ax_edc.get_xticklabels() + ax_edc.get_yticklabels()):
         label.set_fontsize(fontsize)
