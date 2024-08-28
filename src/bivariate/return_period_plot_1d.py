@@ -138,7 +138,9 @@ def return_period_plot(gevd_fitter, bootstrap_gevd_fit, block_size, data_tag,
                   ' observed at least once\nper return period (' +
                   str(data_units_fm) + ')')
     ax.set_xscale('log')
-    ax.legend(loc='lower right')
+    # Best possible legend position, limiting to bottom 85% vertically to
+    #   leave room for axes labels
+    ax.legend(loc='best', bbox_to_anchor=(0, 0, 1, 0.85))
     ax.set_title('Return Period Plot')
 
     return ax
@@ -270,11 +272,10 @@ def calculate_return_period_empirical(data, block_size):
     Function to calculate the return period of provided
     extrema based on exceedance probability.
 
-    Pr_exceedance = 1 - (rank / (n + 1) )
-    rank - the ranking of the ordered data
-    n - number of data points
-
-    tau = 1 / (Pr_exceedance * n_ex_per_year)
+    tau = ( (N + 1) / rank ) / n
+    rank - rank of data in descending order
+    N - number of data points
+    n - number of blocks per year
 
     Parameters
     ----------
@@ -291,17 +292,14 @@ def calculate_return_period_empirical(data, block_size):
 
     """
 
-    # Calculate the number of extrema per year based on block_size
-    extrema_per_year = pd.to_timedelta("365.2425D")/block_size
+    # Calculate the number of blocks per year based on block_size
+    n = pd.to_timedelta("365.2425D")/block_size
 
     # Rank the data
-    rank = stats.rankdata(data)
-
-    # Calculate exceedance probability
-    exceedance_prob = 1. - ((rank)/(data.size + 1.0))
+    rank = (len(data) - stats.rankdata(data)) + 1
 
     # Calculate Return Period
-    tau = (1.0/(exceedance_prob*extrema_per_year))
+    tau = ((len(data) + 1) / (rank)) / n
 
     return tau
 

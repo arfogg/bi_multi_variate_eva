@@ -25,9 +25,8 @@ def calculate_return_period(copula, sample_grid,
     ----------
     copula : copulas copula
         Copula that has been fit to some data
-    sample_grid : pd.DataFrame
-        Two columns with names same as copula, containing x and y values
-        to find the return period for.
+    sample_grid : np.array
+        Grid containing x and y values to find the return period for.
     block_size : pd.Timedelta, optional
         Size over which block maxima have been found. The default
         is pd.to_timedelta("365.2425D").
@@ -319,7 +318,7 @@ def plot_return_period_as_function_x_y(copula,
                                            ci_percentiles=ci_percentiles)
 
     # Initialise plot
-    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(24, 6))
+    fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(9, 21))
 
     # ----- RETURN PERIOD -----
     rp_cbar_norm = colors.LogNorm(vmin=np.quantile(shaped_return_period, 0.1),

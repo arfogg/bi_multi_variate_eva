@@ -394,8 +394,8 @@ def plot_diagnostic(gevd_fitter, bootstrap_gevd_fit, data_tag, data_units_fm,
                                data_units_fm, bootstrap_gevd_fit)
 
     # Some decor
-    t = ax[1, 2].text(0.03, 0.90, '(f)', transform=ax[1, 2].transAxes,
-                      va='top', ha='left')
+    t = ax[1, 2].text(0.03, 0.96, '(f)', transform=ax[1, 2].transAxes,
+                      va='bottom', ha='left')
     t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
 
     fig.tight_layout()
