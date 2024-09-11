@@ -4,6 +4,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/arfogg/bi_multi_variate_eva)](#)
 [![GitHub release date](https://img.shields.io/github/release-date/arfogg/bi_multi_variate_eva)](#)
 [![GitHub last commit](https://img.shields.io/github/last-commit/arfogg/bi_multi_variate_eva)](#)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13384969.svg)](https://doi.org/10.5281/zenodo.13384969)
 
 [![Stars](https://img.shields.io/github/stars/arfogg/bi_multi_variate_eva?style=social&color=%23FFB31A)](#)
 [![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](https://www.python.org/)
