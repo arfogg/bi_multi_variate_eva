@@ -12,10 +12,10 @@
 [![Issues](https://img.shields.io/github/issues/arfogg/bi_multi_variate_eva.svg)](https://github.com/arfogg/bi_multi_variate_eva/issues)
 ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)
 
-Python package to run bivariate and multivariate extreme value analysis on generic data - work in progress.
-Bivariate analysis is described in detail by Fogg et al (2024) currently under review at AGU journal _Space Weather_. Preprint available:
+Python package to run bivariate and multivariate extreme value analysis on generic data - work in progress, bivariate completed so far.
+Bivariate analysis is described in detail by Fogg et al (2024); citation:
 
-Fogg, A. R., D. Healy, C. M. Jackman, et al (2024). _Bivariate Extreme Value Analysis for Space Weather Risk Assessment: solar wind - magnetosphere driving in the terrestrial system._ ESS Open Archive. doi: [10.22541/essoar.172612544.43585872/v1](https://doi.org/10.22541/essoar.172612544.43585872/v1)
+Fogg, A. R., Healy, D., Jackman, C. M., et al. (2025). Bivariate extreme value analysis for space weather risk assessment: Solar wind—magnetosphere driving in the terrestrial system. _Space Weather_, 23, e2024SW004176. [doi: 10.1029/2024SW004176](https://doi.org/10.1029/2024SW004176)
 
 **License:** CC0-1.0
 
